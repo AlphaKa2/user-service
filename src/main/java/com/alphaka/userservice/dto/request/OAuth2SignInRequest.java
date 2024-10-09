@@ -33,6 +33,9 @@ public class OAuth2SignInRequest {
     @Size(min = 2, max = 50, message = "이름은 최소 2자에서 최대 50자까지 입력 가능합니다.")
     private String name;
 
+    @NotBlank(message = "프로필 이미지 주소는 필수 입력값입니다.")
+    private String profileImage;
+
     @Past(message = "생년월일은 과거 날짜여야 합니다.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth;
@@ -49,6 +52,7 @@ public class OAuth2SignInRequest {
                 .email(email)
                 .name(name)
                 .nickname(nickname)
+                .profileImage(profileImage)
                 .birth(birth)
                 .role(Role.USER)
                 .password(UUID.randomUUID().toString())

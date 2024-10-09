@@ -47,19 +47,19 @@ public class UserService {
 
         user.updateLastLogin();
 
-        return Optional.of(UserSignInResponse.fromEntity(user));
+        return Optional.of(UserSignInResponse.userSignInResponse(user));
     }
 
     public Optional<UserSignInResponse> signIn(UserSignInRequest userSignInRequest) {
         String email = userSignInRequest.getEmail();
-        String password = userSignInRequest.getPassword();
+
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty() || passwordEncoder.matches(password, optionalUser.get().getPassword())) {
+        if (optionalUser.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(UserSignInResponse.fromEntity(optionalUser.get()));
+        return Optional.of(UserSignInResponse.userSignInResponseWithPassword(optionalUser.get()));
     }
 
 
