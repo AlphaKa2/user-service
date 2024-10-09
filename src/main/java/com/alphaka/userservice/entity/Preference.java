@@ -26,7 +26,8 @@ public class Preference extends BaseEntity {
 
     // 여행 MBTI
     @Enumerated(EnumType.STRING)
-    private TripMBTI tripMBTI = TripMBTI.ABLP;
+    @Builder.Default
+    private TripMBTI tripMBTI = TripMBTI.NONE;
 
     // 사진 촬영 선호 true = 선호
     @Column(nullable = false)

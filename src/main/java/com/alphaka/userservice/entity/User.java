@@ -44,8 +44,19 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    // 실제 이름
+    @Column(nullable = false)
+    private String name;
+
+    // 전화 번호
+    @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column(nullable = false)
     private LocalDate birth;
 
+    @Column(nullable = false)
+    @Builder.Default
     private String profileImage = "/img/default";
 
     // 유저의 팔로잉 리스트(1:N 관계)
@@ -70,9 +81,9 @@ public class User extends BaseEntity {
     private SocialType socialType;
 
     // 계정 활성화, 블랙리스트 관리용
+    @Builder.Default
     private boolean isActive = true;
 
-    @Column(nullable = false)
     private LocalDateTime lastLoginAt;
 
     // 계정 삭제 시간, 바로 계정 정보를 삭제하지 않고, 일정기간 동안 보관 예정

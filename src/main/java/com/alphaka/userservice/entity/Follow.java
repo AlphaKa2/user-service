@@ -23,7 +23,7 @@ import org.springframework.data.annotation.CreatedDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"follower_id", "followee_id"})
+        @UniqueConstraint(columnNames = {"follower_id", "followed_id"})
 })
 public class Follow {
 
