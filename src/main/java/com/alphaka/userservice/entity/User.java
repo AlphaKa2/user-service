@@ -45,14 +45,11 @@ public class User extends BaseEntity {
     private String nickname;
 
     // 실제 이름
-    @Column(nullable = false)
     private String name;
 
     // 전화 번호
-    @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false)
     private LocalDate birth;
 
     @Column(nullable = false)
@@ -89,4 +86,7 @@ public class User extends BaseEntity {
     // 계정 삭제 시간, 바로 계정 정보를 삭제하지 않고, 일정기간 동안 보관 예정
     private LocalDateTime deletedAt;
 
+    public void updateLastLogin() {
+        this.lastLoginAt = LocalDateTime.now();
+    }
 }
