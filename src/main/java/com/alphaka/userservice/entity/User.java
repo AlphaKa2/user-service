@@ -64,9 +64,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Follow> followers = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "preference_id")
-    private Preference preference;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private TripMBTI mbti = TripMBTI.NONE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
