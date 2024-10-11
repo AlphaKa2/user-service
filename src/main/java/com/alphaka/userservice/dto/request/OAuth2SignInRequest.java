@@ -1,6 +1,5 @@
 package com.alphaka.userservice.dto.request;
 
-import com.alphaka.userservice.entity.Preference;
 import com.alphaka.userservice.entity.Role;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
@@ -8,7 +7,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -45,8 +43,6 @@ public class OAuth2SignInRequest {
     private String nickname;
 
     public User toEntity() {
-        Preference pre = Preference.builder()
-                .build();
 
         return User.builder()
                 .email(email)
@@ -57,7 +53,6 @@ public class OAuth2SignInRequest {
                 .role(Role.USER)
                 .password(UUID.randomUUID().toString())
                 .socialType(socialType)
-                .preference(pre)
                 .build();
     }
 }

@@ -1,7 +1,5 @@
 package com.alphaka.userservice.dto.request;
 
-
-import com.alphaka.userservice.entity.Preference;
 import com.alphaka.userservice.entity.Role;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
@@ -50,8 +48,6 @@ public class UserSignUpRequest {
     private String password;
 
     public User toEntity() {
-        Preference pre = Preference.builder()
-                .build();
 
         return User.builder()
                 .email(email)
@@ -62,7 +58,6 @@ public class UserSignUpRequest {
                 .role(Role.USER)
                 .password(password)
                 .socialType(SocialType.EMAIL)
-                .preference(pre)
                 .build();
     }
 }

@@ -6,6 +6,8 @@ import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.exception.custom.EmailDuplicationException;
+import com.alphaka.userservice.exception.custom.InvalidEmailOrPasswordException;
 import com.alphaka.userservice.service.UserService;
 import jakarta.validation.Valid;
 import java.util.Optional;
@@ -26,7 +28,7 @@ public class UserController {
         Optional<User> user = userService.join(userSignUpRequest);
 
         if (user.isEmpty()) {
-            return ApiResponse.createErrorResponseWithExceptions(HttpStatus.BAD_REQUEST.value(), "이미 존재하는 사용자 입니다.");
+            throw new EmailDuplicationException();
         }
         return ApiResponse.createSuccessResponse(HttpStatus.CREATED.value());
     }
@@ -37,8 +39,7 @@ public class UserController {
         Optional<UserSignInResponse> response = userService.oauth2SignIn(oAuth2SignInRequest);
 
         if (response.isEmpty()) {
-            return ApiResponse.createErrorResponseWithExceptions(HttpStatus.BAD_REQUEST.value(),
-                    UserSignInResponse.errorResponse());
+            throw new EmailDuplicationException();
         }
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
     }
@@ -49,8 +50,7 @@ public class UserController {
         Optional<UserSignInResponse> response = userService.signIn(userSignInRequest);
 
         if (response.isEmpty()) {
-            return ApiResponse.createErrorResponseWithExceptions(HttpStatus.BAD_REQUEST.value(),
-                    UserSignInResponse.errorResponse());
+            throw new InvalidEmailOrPasswordException();
         }
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
     }
