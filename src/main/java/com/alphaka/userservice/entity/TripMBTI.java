@@ -8,7 +8,8 @@ public enum TripMBTI {
     RBLJ("체계적 휴식파"), RBLP("즉흥적 휴양가"),
     RBSJ("절약형 전략가"), RBSP("즉흥적 절약 휴양가"),
     RCLJ("여유로운 소비형 휴양가"), RCLP("자유로운 소비형 휴식가"),
-    RCSJ("느긋한 절약형 휴양가"), RCSP("자유로운 절약형 휴양가");
+    RCSJ("느긋한 절약형 휴양가"), RCSP("자유로운 절약형 휴양가"),
+    NONE("MBTI 검사 필요");
 
     private final String description;
 
