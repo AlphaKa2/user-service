@@ -15,19 +15,20 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserSignInResponse {
 
-    private String email;
+    private Long id;
+    private String profileImage;
+    private String nickname;
     private Role role;
     private String password;
 
     public static UserSignInResponse userSignInResponse(User user) {
-        return new UserSignInResponse(user.getEmail(), user.getRole(), null);
+        return new UserSignInResponse(user.getId(), user.getProfileImage(), user.getNickname(),
+                user.getRole(), null);
     }
 
     public static UserSignInResponse userSignInResponseWithPassword(User user) {
-        return new UserSignInResponse(user.getEmail(), user.getRole(), user.getPassword());
+        return new UserSignInResponse(user.getId(), user.getProfileImage(), user.getNickname(),
+                user.getRole(), user.getPassword());
     }
 
-    public static UserSignInResponse errorResponse() {
-        return new UserSignInResponse(null, null, null);
-    }
 }
