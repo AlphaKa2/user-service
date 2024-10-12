@@ -8,11 +8,14 @@ import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.exception.custom.EmailDuplicationException;
 import com.alphaka.userservice.exception.custom.InvalidEmailOrPasswordException;
+import com.alphaka.userservice.exception.custom.UserNotFoundException;
 import com.alphaka.userservice.service.UserService;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping("/users/{userId}")
+    public ApiResponse<UserSignInResponse> user(@PathVariable Long userId) {
+        Optional<UserSignInResponse> response = userService.findUserById(userId);
+
+        if (response.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
+    }
 
     @PostMapping("/users/join")
     public ApiResponse<String> join(@RequestBody @Valid UserSignUpRequest userSignUpRequest) {

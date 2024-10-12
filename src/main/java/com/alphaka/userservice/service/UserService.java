@@ -21,6 +21,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public Optional<UserSignInResponse> findUserById(Long userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+        return maybeUser.map(UserSignInResponse::userSignInResponse);
+    }
+
     @Transactional
     public Optional<User> join(UserSignUpRequest userSignUpRequest) {
         if (userRepository.findByEmail(userSignUpRequest.getEmail()).isPresent()) {
@@ -54,12 +59,9 @@ public class UserService {
         String email = userSignInRequest.getEmail();
 
 
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-            return Optional.empty();
-        }
+        Optional<User> maybeUser = userRepository.findByEmail(email);
+        return maybeUser.map(UserSignInResponse::userSignInResponseWithPassword);
 
-        return Optional.of(UserSignInResponse.userSignInResponseWithPassword(optionalUser.get()));
     }
 
 
