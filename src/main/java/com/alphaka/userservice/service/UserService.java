@@ -64,5 +64,13 @@ public class UserService {
 
     }
 
+    @Transactional
+    public void disableUser(String email) {
+        User user = userRepository.findByEmail(email).get();
+        user.disable();
+
+        userRepository.save(user);
+    }
+
 
 }

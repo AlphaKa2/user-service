@@ -90,4 +90,8 @@ public class User extends BaseEntity {
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
     }
+
+    public void disable() {
+        this.isActive = false;
+    }
 }
