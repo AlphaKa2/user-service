@@ -1,5 +1,6 @@
 package com.alphaka.userservice.dto.request;
 
+import com.alphaka.userservice.entity.Gender;
 import com.alphaka.userservice.entity.Role;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
@@ -37,6 +38,9 @@ public class UserSignUpRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth;
 
+    @NotNull(message = "성별은 필수 입력값입니다. ")
+    private Gender gender;
+
     @NotBlank(message = "닉네임은 필수 입력값입니다.")
     @Size(min = 3, max = 20, message = "닉네임은 최소 3자에서 최대 20자까지 입력 가능합니다.")
     private String nickname;
@@ -53,6 +57,7 @@ public class UserSignUpRequest {
                 .email(email)
                 .name(name)
                 .nickname(nickname)
+                .gender(gender)
                 .birth(birth)
                 .phoneNumber(phoneNumber)
                 .role(Role.USER)

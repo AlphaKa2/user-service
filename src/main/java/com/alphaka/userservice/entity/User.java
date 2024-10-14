@@ -70,6 +70,11 @@ public class User extends BaseEntity {
     private TripMBTI mbti = TripMBTI.NONE;
 
     @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private String profileDescription;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
