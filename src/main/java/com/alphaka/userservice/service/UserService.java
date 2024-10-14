@@ -4,11 +4,15 @@ import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
+import com.alphaka.userservice.entity.Follow;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.kafka.service.UserSignupProducerService;
 import com.alphaka.userservice.repository.UserRepository;
+import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.common.quota.ClientQuotaAlteration.Op;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserSignupProducerService userSignupProducerService;
 
     public Optional<User> findUserById(Long userId) {
         return userRepository.findById(userId);
@@ -32,7 +37,11 @@ public class UserService {
         }
 
         userSignUpRequest.setPassword(passwordEncoder.encode(userSignUpRequest.getPassword()));
-        return Optional.of(userRepository.save(userSignUpRequest.toEntity()));
+        User savedUser = userRepository.save(userSignUpRequest.toEntity());
+
+        //회원 생성 이벤트 전송
+        userSignupProducerService.sendMessage(savedUser.getId());
+        return Optional.of(savedUser);
     }
 
     @Transactional
@@ -56,7 +65,6 @@ public class UserService {
 
     public Optional<UserSignInResponse> signIn(UserSignInRequest userSignInRequest) {
         String email = userSignInRequest.getEmail();
-
 
         Optional<User> maybeUser = userRepository.findByEmail(email);
         return maybeUser.map(UserSignInResponse::userSignInResponseWithPasswordFromUser);
