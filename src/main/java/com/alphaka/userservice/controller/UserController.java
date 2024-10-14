@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -69,5 +70,12 @@ public class UserController {
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
     }
 
+
+    //닉네임 중복체크, 닉네임이 중복이 아니라면 true 리턴
+    @GetMapping("/nickname/validation}")
+    public ApiResponse<Boolean> nicknameValidation(@RequestParam("nickname") String nickname) {
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                userService.findUserByNickname(nickname).isEmpty());
+    }
 
 }

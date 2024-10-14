@@ -64,6 +64,10 @@ public class UserService {
 
     }
 
+    public Optional<User> findUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname);
+    }
+
     @Transactional
     public void disableUser(String email) {
         User user = userRepository.findByEmail(email).get();
