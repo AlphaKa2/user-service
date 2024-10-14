@@ -21,9 +21,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Optional<UserSignInResponse> findUserById(Long userId) {
-        Optional<User> maybeUser = userRepository.findById(userId);
-        return maybeUser.map(UserSignInResponse::userSignInResponse);
+    public Optional<User> findUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
     @Transactional
@@ -52,7 +51,7 @@ public class UserService {
 
         user.updateLastLogin();
 
-        return Optional.of(UserSignInResponse.userSignInResponse(user));
+        return Optional.of(UserSignInResponse.userSignInResponseFromUser(user));
     }
 
     public Optional<UserSignInResponse> signIn(UserSignInRequest userSignInRequest) {
@@ -60,7 +59,7 @@ public class UserService {
 
 
         Optional<User> maybeUser = userRepository.findByEmail(email);
-        return maybeUser.map(UserSignInResponse::userSignInResponseWithPassword);
+        return maybeUser.map(UserSignInResponse::userSignInResponseWithPasswordFromUser);
 
     }
 

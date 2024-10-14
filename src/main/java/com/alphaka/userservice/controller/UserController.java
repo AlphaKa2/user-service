@@ -4,6 +4,7 @@ import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
+import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.exception.custom.EmailDuplicationException;
@@ -27,15 +28,17 @@ public class UserController {
 
     private final UserService userService;
 
+    //accessToken 재발급 시 사용
     @GetMapping("/users/{userId}")
     public ApiResponse<UserSignInResponse> user(@PathVariable Long userId) {
-        Optional<UserSignInResponse> response = userService.findUserById(userId);
+        Optional<User> maybeUser = userService.findUserById(userId);
 
-        if (response.isEmpty()) {
+        if (maybeUser.isEmpty()) {
             throw new UserNotFoundException();
         }
 
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserSignInResponse.userSignInResponseFromUser(maybeUser.get()));
     }
 
     @PostMapping("/users/join")
@@ -72,10 +75,21 @@ public class UserController {
 
 
     //닉네임 중복체크, 닉네임이 중복이 아니라면 true 리턴
-    @GetMapping("/nickname/validation}")
+    @GetMapping("/users/nickname/validation")
     public ApiResponse<Boolean> nicknameValidation(@RequestParam("nickname") String nickname) {
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 userService.findUserByNickname(nickname).isEmpty());
     }
 
+    @GetMapping("/users/profile/{userId}")
+    public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
+        Optional<User> maybeUser = userService.findUserById(userId);
+
+        if (maybeUser.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserProfileResponse.fromUser(maybeUser.get()));
+    }
 }
