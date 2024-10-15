@@ -4,6 +4,7 @@ import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
+import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
@@ -94,6 +95,28 @@ public class UserController {
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 UserProfileResponse.fromUser(maybeUser.get()));
+    }
+
+    @GetMapping("/info/{userId}")
+    ApiResponse<UserInfoResponse> userInfoById(@PathVariable("userId") Long userId) {
+        Optional<User> maybeUser = userService.findUserById(userId);
+
+        if (maybeUser.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), UserInfoResponse.fromUser(maybeUser.get()));
+    }
+
+    @GetMapping("/info/nickname/nickname}}")
+    ApiResponse<UserInfoResponse> userInfoById(@PathVariable("nickname") String nickname) {
+        Optional<User> maybeUser = userService.findUserByNickname(nickname);
+
+        if (maybeUser.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), UserInfoResponse.fromUser(maybeUser.get()));
     }
 
 }
