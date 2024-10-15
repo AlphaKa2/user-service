@@ -2,6 +2,7 @@ package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
@@ -154,6 +155,16 @@ public class UserController {
                                                   @RequestBody @Valid PasswordUpdateRequest passwordUpdateRequest,
                                                   AuthenticatedUserInfo authenticatedUserInfo) {
         userService.updatePassword(userId, passwordUpdateRequest, authenticatedUserInfo);
+
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
+    }
+
+    @PutMapping("/{userId}/mbti")
+    @ResponseBody
+    public ApiResponse<String> updateUserPassword(@PathVariable("userId") Long userId,
+                                                  @RequestBody @Valid TripMbtiUpdateRequest tripMbtiUpdateRequest,
+                                                  AuthenticatedUserInfo authenticatedUserInfo) {
+        userService.updateMbti(userId, tripMbtiUpdateRequest, authenticatedUserInfo);
 
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }

@@ -107,6 +107,10 @@ public class User extends BaseEntity {
         this.password = encryptedPassword;
     }
 
+    public void updateMbti(TripMBTI mbti) {
+        this.mbti = mbti;
+    }
+
     public void disable() {
         this.isActive = false;
     }

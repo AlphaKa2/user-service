@@ -2,12 +2,15 @@ package com.alphaka.userservice.service;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.SocialType;
+import com.alphaka.userservice.entity.TripMBTI;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.exception.custom.InvalidMbtiRequestException;
 import com.alphaka.userservice.exception.custom.NicknameDuplicationException;
 import com.alphaka.userservice.exception.custom.UnauthorizedAccessReqeust;
 import com.alphaka.userservice.exception.custom.UnchangedNewPasswordException;
@@ -141,5 +144,25 @@ public class UserService {
         }
 
         user.updatePassword(passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public void updateMbti(Long userId, TripMbtiUpdateRequest tripMbtiUpdateRequest,
+                           AuthenticatedUserInfo authenticatedUserInfo) {
+
+        if (!userId.equals(authenticatedUserInfo.getId())) {
+            throw new UnauthorizedAccessReqeust();
+        }
+
+        User user = userRepository.findById(authenticatedUserInfo.getId()).get();
+
+        TripMBTI newMbti;
+        try {
+            newMbti = TripMBTI.valueOf(tripMbtiUpdateRequest.getMbti());
+        } catch (Exception e) {
+            throw new InvalidMbtiRequestException();
+        }
+
+        user.updateMbti(newMbti);
     }
 }
