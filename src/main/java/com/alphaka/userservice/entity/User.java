@@ -29,7 +29,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "Users")
 public class User extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -92,6 +93,14 @@ public class User extends BaseEntity {
 
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateProfileDescription(String profileDescription) {
+        this.profileDescription = profileDescription;
     }
 
     public void disable() {

@@ -1,18 +1,19 @@
 package com.alphaka.userservice.service;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
-import com.alphaka.userservice.entity.Follow;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.exception.custom.NicknameDuplicationException;
+import com.alphaka.userservice.exception.custom.UserNotFoundException;
 import com.alphaka.userservice.kafka.service.UserSignupProducerService;
 import com.alphaka.userservice.repository.UserRepository;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.common.quota.ClientQuotaAlteration.Op;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,5 +84,30 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void updateUserDetails(Long userId, UserDetailsUpdateRequest userDetailsUpdateRequest,
+                                  AuthenticatedUserInfo authenticatedUserInfo) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+
+        if (maybeUser.isEmpty() || !userId.equals(authenticatedUserInfo.getId())) {
+            throw new UserNotFoundException();
+        }
+
+        User user = maybeUser.get();
+        String newNickname = userDetailsUpdateRequest.getNickname();
+
+        //새로운 닉네임이라면 중복 체크
+        if (!newNickname.equals(user.getNickname())) {
+            Optional<User> maybeUserWithNewNickname = userRepository.findByNickname(newNickname);
+
+            if (maybeUserWithNewNickname.isPresent()) {
+                throw new NicknameDuplicationException();
+            }
+        }
+
+        user.updateNickname(newNickname);
+        user.updateProfileDescription(userDetailsUpdateRequest.getProfileDescription());
+
+    }
 
 }

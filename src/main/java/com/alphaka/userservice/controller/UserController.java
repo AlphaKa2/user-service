@@ -1,9 +1,11 @@
 package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
+import com.alphaka.userservice.dto.response.UserDetailsResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
@@ -12,6 +14,7 @@ import com.alphaka.userservice.exception.custom.EmailDuplicationException;
 import com.alphaka.userservice.exception.custom.InvalidEmailOrPasswordException;
 import com.alphaka.userservice.exception.custom.UserNotFoundException;
 import com.alphaka.userservice.service.UserService;
+import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +22,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -97,25 +102,49 @@ public class UserController {
     }
 
     @GetMapping("/info/{userId}")
-    ApiResponse<UserInfoResponse> userInfoById(@PathVariable("userId") Long userId) {
+    public ApiResponse<UserInfoResponse> userInfoById(@PathVariable("userId") Long userId) {
         Optional<User> maybeUser = userService.findUserById(userId);
 
         if (maybeUser.isEmpty()) {
             throw new UserNotFoundException();
         }
 
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), UserInfoResponse.fromUser(maybeUser.get()));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserInfoResponse.fromUser(maybeUser.get()));
     }
 
     @GetMapping("/info/nickname/{nickname}")
-    ApiResponse<UserInfoResponse> userInfoById(@PathVariable("nickname") String nickname) {
+    public ApiResponse<UserInfoResponse> userInfoByNickname(@PathVariable("nickname") String nickname) {
         Optional<User> maybeUser = userService.findUserByNickname(nickname);
 
         if (maybeUser.isEmpty()) {
             throw new UserNotFoundException();
         }
 
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), UserInfoResponse.fromUser(maybeUser.get()));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserInfoResponse.fromUser(maybeUser.get()));
+    }
+
+    @GetMapping("/details/{userId}")
+    public ApiResponse<UserDetailsResponse> userDetails(@PathVariable("userId") Long userId) {
+        Optional<User> maybeUser = userService.findUserById(userId);
+
+        if (maybeUser.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserDetailsResponse.fromUser(maybeUser.get()));
+    }
+
+    @PutMapping("/details/{userId}")
+    @ResponseBody
+    public ApiResponse<String> updateUserDetails(@PathVariable("userId") Long userId,
+                                                 @RequestBody @Valid UserDetailsUpdateRequest userDetailsUpdateRequest,
+                                                 AuthenticatedUserInfo authenticatedUserInfo) {
+        userService.updateUserDetails(userId, userDetailsUpdateRequest, authenticatedUserInfo);
+
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
 }
