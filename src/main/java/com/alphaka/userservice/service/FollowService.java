@@ -1,9 +1,10 @@
 package com.alphaka.userservice.service;
 
+import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.entity.Follow;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.repository.FollowRepository;
-import com.alphaka.userservice.util.AuthenticatedUserInfo;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,30 @@ public class FollowService {
         return Optional.of(follow);
     }
 
+
+    //해당 사용자가 팔로우하는 유저들
+    public List<UserInfoResponse> followings(Long userId) {
+
+        Optional<User> maybeUser = userService.findUserById(userId);
+
+        if (maybeUser.isEmpty()) {
+            return null;
+        }
+
+        return followRepository.findFollowingsByUserId(userId);
+    }
+
+    //해당 사용자를 팔로우하는 유저들
+    public List<UserInfoResponse> followers(Long userId) {
+
+        Optional<User> maybeUser = userService.findUserById(userId);
+
+        if (maybeUser.isEmpty()) {
+            return null;
+        }
+
+        return followRepository.findFollowersByUserId(userId);
+    }
 
 
 

@@ -12,7 +12,6 @@ import com.alphaka.userservice.exception.custom.EmailDuplicationException;
 import com.alphaka.userservice.exception.custom.InvalidEmailOrPasswordException;
 import com.alphaka.userservice.exception.custom.UserNotFoundException;
 import com.alphaka.userservice.service.UserService;
-import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
