@@ -103,6 +103,10 @@ public class User extends BaseEntity {
         this.profileDescription = profileDescription;
     }
 
+    public void updatePassword(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
+
     public void disable() {
         this.isActive = false;
     }

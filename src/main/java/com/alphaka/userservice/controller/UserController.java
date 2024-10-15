@@ -1,6 +1,7 @@
 package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
@@ -137,12 +138,22 @@ public class UserController {
                 UserDetailsResponse.fromUser(maybeUser.get()));
     }
 
-    @PutMapping("/details/{userId}")
+    @PutMapping("/{userId}/details")
     @ResponseBody
     public ApiResponse<String> updateUserDetails(@PathVariable("userId") Long userId,
                                                  @RequestBody @Valid UserDetailsUpdateRequest userDetailsUpdateRequest,
                                                  AuthenticatedUserInfo authenticatedUserInfo) {
         userService.updateUserDetails(userId, userDetailsUpdateRequest, authenticatedUserInfo);
+
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
+    }
+
+    @PutMapping("/{userId}/password")
+    @ResponseBody
+    public ApiResponse<String> updateUserPassword(@PathVariable("userId") Long userId,
+                                                  @RequestBody @Valid PasswordUpdateRequest passwordUpdateRequest,
+                                                  AuthenticatedUserInfo authenticatedUserInfo) {
+        userService.updatePassword(userId, passwordUpdateRequest, authenticatedUserInfo);
 
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }

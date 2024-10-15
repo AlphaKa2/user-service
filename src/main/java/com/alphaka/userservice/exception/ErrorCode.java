@@ -15,7 +15,10 @@ public enum ErrorCode {
     INVALID_USER_DETAILS_UPDATE_REQUEST(HttpStatus.BAD_REQUEST.value(), "USR009", "수정이 불가능합니다."),
     NICKNAME_DUPLICATION(HttpStatus.CONFLICT.value(), "USR007", "이미 사용중인 닉네임입니다."),
     UNAUTHENTICATED_USER_REQUEST(HttpStatus.UNAUTHORIZED.value(), "USR016", "인증되지 않은 요청입니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "USR018", "존재하지 않는 사용자입니다.");
+    UNAUTHORIZED_ACCESS_REQUEST(HttpStatus.UNAUTHORIZED.value(), "USR016", "권한이 없습니다."),
+    UNCHANGED_NEW_PASSWORD(HttpStatus.BAD_REQUEST.value(), "USR006", "기존 비밀번호와 일치합니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "USR018", "존재하지 않는 사용자입니다."),
+    WRONG_PREVIOUS_PASSWORD(HttpStatus.BAD_REQUEST.value(), "USR005", "틀린 비밀번호입니다.");
     private final int status;
     private final String code;
     private final String message;

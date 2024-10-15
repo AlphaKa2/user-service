@@ -1,6 +1,7 @@
 package com.alphaka.userservice.service;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
@@ -8,7 +9,10 @@ import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.exception.custom.NicknameDuplicationException;
+import com.alphaka.userservice.exception.custom.UnauthorizedAccessReqeust;
+import com.alphaka.userservice.exception.custom.UnchangedNewPasswordException;
 import com.alphaka.userservice.exception.custom.UserNotFoundException;
+import com.alphaka.userservice.exception.custom.WrongPreviousPasswordException;
 import com.alphaka.userservice.kafka.service.UserSignupProducerService;
 import com.alphaka.userservice.repository.UserRepository;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
@@ -110,4 +114,32 @@ public class UserService {
 
     }
 
+    @Transactional
+    public void updatePassword(Long userId, PasswordUpdateRequest passwordUpdateRequest,
+                               AuthenticatedUserInfo authenticatedUserInfo) {
+
+        if (!userId.equals(authenticatedUserInfo.getId())) {
+            throw new UnauthorizedAccessReqeust();
+        }
+
+        String previousPassword = passwordUpdateRequest.getPreviousPassword();
+        String newPassword = passwordUpdateRequest.getNewPassword();
+
+        if (previousPassword.equals(newPassword)) {
+            throw new UnchangedNewPasswordException();
+        }
+
+        User user = userRepository.findById(authenticatedUserInfo.getId()).get();
+
+        // 소셜 로그인 사용자라면
+        if (user.getSocialType() != SocialType.EMAIL) {
+            throw new UnauthorizedAccessReqeust();
+        }
+
+        if (!passwordEncoder.matches(previousPassword, user.getPassword())) {
+            throw new WrongPreviousPasswordException();
+        }
+
+        user.updatePassword(passwordEncoder.encode(newPassword));
+    }
 }
