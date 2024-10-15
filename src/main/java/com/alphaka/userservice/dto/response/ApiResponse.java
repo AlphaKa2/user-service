@@ -30,6 +30,8 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> createSuccessResponse(int code) {
         return ApiResponse.<T>builder()
                 .code(code)
+                .data(null)
+                .message(null)
                 .build();
     }
 }

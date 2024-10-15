@@ -29,7 +29,10 @@ public class FollowService {
         User user = userService.findUserById(userId).get();
         User targetUser = maybeTargetUser.get();
 
-        if (isAlreadyFollowing(user, targetUser)) {
+        Optional<Follow> maybeFollow = followRepository.findByFollowerAndFollowed(user, targetUser);
+
+        // 이미 팔로우를 하고 있는 경우
+        if (maybeFollow.isPresent()) {
             return Optional.empty();
         }
 
@@ -46,8 +49,36 @@ public class FollowService {
         return Optional.of(follow);
     }
 
-    private boolean isAlreadyFollowing(User follower, User followed) {
-        return followRepository.existsByFollowerAndFollowed(follower, followed);
+    @Transactional
+    public Optional<Follow> unfollow(Long userId, Long targetUserId) {
+
+        Optional<User> maybeTargetUser = userService.findUserById(targetUserId);
+
+        if (userId.equals(targetUserId) || maybeTargetUser.isEmpty()) {
+            return Optional.empty();
+        }
+
+        User user = userService.findUserById(userId).get();
+        User targetUser = maybeTargetUser.get();
+
+        Optional<Follow> maybeFollow = followRepository.findByFollowerAndFollowed(user, targetUser);
+
+        // 두 유저 간의 팔로우 기록이 없는 경우
+        if (maybeFollow.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Follow follow = maybeFollow.get();
+
+        followRepository.delete(follow);
+
+        user.getFollowing().remove(follow);
+        targetUser.getFollowers().remove(follow);
+
+        return Optional.of(follow);
     }
+
+
+
 
 }

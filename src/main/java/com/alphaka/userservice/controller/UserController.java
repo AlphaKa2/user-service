@@ -108,7 +108,7 @@ public class UserController {
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), UserInfoResponse.fromUser(maybeUser.get()));
     }
 
-    @GetMapping("/info/nickname/nickname}}")
+    @GetMapping("/info/nickname/{nickname}")
     ApiResponse<UserInfoResponse> userInfoById(@PathVariable("nickname") String nickname) {
         Optional<User> maybeUser = userService.findUserByNickname(nickname);
 
