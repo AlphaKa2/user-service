@@ -6,10 +6,10 @@ import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
-import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.TripMBTI;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.exception.custom.EmailDuplicationException;
 import com.alphaka.userservice.exception.custom.InvalidMbtiRequestException;
 import com.alphaka.userservice.exception.custom.NicknameDuplicationException;
 import com.alphaka.userservice.exception.custom.UnauthorizedAccessReqeust;
@@ -20,6 +20,7 @@ import com.alphaka.userservice.kafka.service.UserSignupProducerService;
 import com.alphaka.userservice.repository.UserRepository;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import java.util.Optional;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,14 +35,22 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserSignupProducerService userSignupProducerService;
 
-    public Optional<User> findUserById(Long userId) {
-        return userRepository.findById(userId);
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
     }
 
     @Transactional
-    public Optional<User> join(UserSignUpRequest userSignUpRequest) {
+    public void join(UserSignUpRequest userSignUpRequest) {
+
+        // 이메일 중복 검사
         if (userRepository.findByEmail(userSignUpRequest.getEmail()).isPresent()) {
-            return Optional.empty();
+            throw new EmailDuplicationException();
+        }
+
+        // 닉네임 중복 검사
+        if (userRepository.findByNickname(userSignUpRequest.getNickname()).isPresent()) {
+            throw new NicknameDuplicationException();
         }
 
         userSignUpRequest.setPassword(passwordEncoder.encode(userSignUpRequest.getPassword()));
@@ -49,18 +58,25 @@ public class UserService {
 
         //회원 생성 이벤트 전송
         userSignupProducerService.sendMessage(savedUser.getId());
-        return Optional.of(savedUser);
     }
 
     @Transactional
-    public Optional<UserSignInResponse> oauth2SignIn(OAuth2SignInRequest oAuth2SignInRequest) {
+    public User oauth2SignIn(OAuth2SignInRequest oAuth2SignInRequest) {
         String email = oAuth2SignInRequest.getEmail();
+        String nickname = oAuth2SignInRequest.getNickname();
         SocialType socialType = oAuth2SignInRequest.getSocialType();
 
         //자체 회원 혹은 다른 소셜 로그인을 통해 이미 같은 이메일로 가입한 경우
         if (userRepository.findByEmailAndSocialTypeNot(email, socialType).isPresent()) {
-            return Optional.empty();
+            throw new EmailDuplicationException();
         }
+
+        // 닉네임 중복 검사, 중복된다면 랜덤한 숫자 추가.
+        String validNickname = nickname;
+        while (!userRepository.findByNickname(validNickname).isPresent()) {
+            validNickname = nickname + new Random().nextInt(100000000);
+        }
+        oAuth2SignInRequest.setNickname(validNickname);
 
         //유일한 이메일인 경우 소셜 로그인 성공, 만약 DB에 존재하지 않다면 가입
         User user = userRepository.findByEmailAndSocialType(email, socialType)
@@ -68,19 +84,22 @@ public class UserService {
 
         user.updateLastLogin();
 
-        return Optional.of(UserSignInResponse.userSignInResponseFromUser(user));
+        return user;
     }
 
-    public Optional<UserSignInResponse> signIn(UserSignInRequest userSignInRequest) {
+
+    public User signIn(UserSignInRequest userSignInRequest) {
         String email = userSignInRequest.getEmail();
 
-        Optional<User> maybeUser = userRepository.findByEmail(email);
-        return maybeUser.map(UserSignInResponse::userSignInResponseWithPasswordFromUser);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
 
+        return user;
     }
 
-    public Optional<User> findUserByNickname(String nickname) {
-        return userRepository.findByNickname(nickname);
+    public User findUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(NicknameDuplicationException::new);
     }
 
     @Transactional
@@ -94,13 +113,9 @@ public class UserService {
     @Transactional
     public void updateUserDetails(Long userId, UserDetailsUpdateRequest userDetailsUpdateRequest,
                                   AuthenticatedUserInfo authenticatedUserInfo) {
-        Optional<User> maybeUser = userRepository.findById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
 
-        if (maybeUser.isEmpty() || !userId.equals(authenticatedUserInfo.getId())) {
-            throw new UserNotFoundException();
-        }
-
-        User user = maybeUser.get();
         String newNickname = userDetailsUpdateRequest.getNickname();
 
         //새로운 닉네임이라면 중복 체크

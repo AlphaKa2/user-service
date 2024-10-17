@@ -13,12 +13,10 @@ import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.exception.custom.EmailDuplicationException;
-import com.alphaka.userservice.exception.custom.InvalidEmailOrPasswordException;
 import com.alphaka.userservice.exception.custom.UserNotFoundException;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import jakarta.validation.Valid;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,102 +39,89 @@ public class UserController {
     //accessToken 재발급 시 사용
     @GetMapping("/{userId}")
     public ApiResponse<UserSignInResponse> user(@PathVariable Long userId) {
-        Optional<User> maybeUser = userService.findUserById(userId);
 
-        if (maybeUser.isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        User user = userService.findUserById(userId);
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserSignInResponse.userSignInResponseFromUser(maybeUser.get()));
+                UserSignInResponse.userSignInResponseFromUser(user));
     }
 
+    // 자체 회원가입
     @PostMapping("/join")
     public ApiResponse<String> join(@RequestBody @Valid UserSignUpRequest userSignUpRequest) {
-        Optional<User> user = userService.join(userSignUpRequest);
+        userService.join(userSignUpRequest);
 
-        if (user.isEmpty()) {
-            throw new EmailDuplicationException();
-        }
         return ApiResponse.createSuccessResponse(HttpStatus.CREATED.value());
     }
+
 
     // 인증 서비스에서 OAuth2 로그인 시
     @PostMapping("/oauth2/signin")
     public ApiResponse<UserSignInResponse> oauth2SignIn(@RequestBody @Valid OAuth2SignInRequest oAuth2SignInRequest) {
-        Optional<UserSignInResponse> response = userService.oauth2SignIn(oAuth2SignInRequest);
+        User user = userService.oauth2SignIn(oAuth2SignInRequest);
 
-        if (response.isEmpty()) {
-            throw new EmailDuplicationException();
-        }
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserSignInResponse.userSignInResponseFromUser(user));
     }
+
 
     // 인증 서비스에서 자체 로그인 시
     @PostMapping("/signin")
     public ApiResponse<UserSignInResponse> signIn(@RequestBody @Valid UserSignInRequest userSignInRequest) {
-        Optional<UserSignInResponse> response = userService.signIn(userSignInRequest);
+        User user = userService.signIn(userSignInRequest);
 
-        if (response.isEmpty()) {
-            throw new InvalidEmailOrPasswordException();
-        }
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response.get());
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserSignInResponse.userSignInResponseWithPasswordFromUser(user));
     }
 
 
     //닉네임 중복체크, 닉네임이 중복이 아니라면 true 리턴
-    @GetMapping("/nickname/validation")
-    public ApiResponse<Boolean> nicknameValidation(@RequestParam("nickname") String nickname) {
+    @GetMapping("/{nickname}/exist")
+    public ApiResponse<Boolean> nicknameValidation(@PathVariable("nickname") String nickname) {
+
+        try {
+            userService.findUserByNickname(nickname);
+        } catch (EmailDuplicationException exception) {
+            return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                    false);
+        }
+
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                userService.findUserByNickname(nickname).isEmpty());
+                true);
     }
 
-    @GetMapping("/profile/{userId}")
+    @GetMapping("/{userId}/profile")
     public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
-        Optional<User> maybeUser = userService.findUserById(userId);
+        User user = userService.findUserById(userId);
 
-        if (maybeUser.isEmpty()) {
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                UserProfileResponse.fromUser(user));
+    }
+
+    @GetMapping("/info")
+    public ApiResponse<UserInfoResponse> userInfoByNickname(
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "nickname", required = false) String nickname) {
+
+        User user = null;
+        if (id != null) {
+            user = userService.findUserById(id);
+        } else if (nickname != null) {
+            user = userService.findUserByNickname(nickname);
+        } else {
             throw new UserNotFoundException();
         }
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserProfileResponse.fromUser(maybeUser.get()));
+                UserInfoResponse.fromUser(user));
     }
 
-    @GetMapping("/info/{userId}")
-    public ApiResponse<UserInfoResponse> userInfoById(@PathVariable("userId") Long userId) {
-        Optional<User> maybeUser = userService.findUserById(userId);
-
-        if (maybeUser.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserInfoResponse.fromUser(maybeUser.get()));
-    }
-
-    @GetMapping("/info/nickname/{nickname}")
-    public ApiResponse<UserInfoResponse> userInfoByNickname(@PathVariable("nickname") String nickname) {
-        Optional<User> maybeUser = userService.findUserByNickname(nickname);
-
-        if (maybeUser.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserInfoResponse.fromUser(maybeUser.get()));
-    }
-
-    @GetMapping("/details/{userId}")
+    @GetMapping("/{userId}/details")
     public ApiResponse<UserDetailsResponse> userDetails(@PathVariable("userId") Long userId) {
-        Optional<User> maybeUser = userService.findUserById(userId);
-
-        if (maybeUser.isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        User user = userService.findUserById(userId);
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserDetailsResponse.fromUser(maybeUser.get()));
+                UserDetailsResponse.fromUser(user));
     }
 
     @PutMapping("/{userId}/details")
