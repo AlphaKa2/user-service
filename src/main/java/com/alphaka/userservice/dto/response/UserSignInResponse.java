@@ -21,12 +21,12 @@ public class UserSignInResponse {
     private Role role;
     private String password;
 
-    public static UserSignInResponse userSignInResponse(User user) {
+    public static UserSignInResponse userSignInResponseFromUser(User user) {
         return new UserSignInResponse(user.getId(), user.getProfileImage(), user.getNickname(),
                 user.getRole(), null);
     }
 
-    public static UserSignInResponse userSignInResponseWithPassword(User user) {
+    public static UserSignInResponse userSignInResponseWithPasswordFromUser(User user) {
         return new UserSignInResponse(user.getId(), user.getProfileImage(), user.getNickname(),
                 user.getRole(), user.getPassword());
     }

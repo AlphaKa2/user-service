@@ -9,9 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +29,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "Users")
 public class User extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -70,6 +69,11 @@ public class User extends BaseEntity {
     private TripMBTI mbti = TripMBTI.NONE;
 
     @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private String profileDescription;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
@@ -89,5 +93,25 @@ public class User extends BaseEntity {
 
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateProfileDescription(String profileDescription) {
+        this.profileDescription = profileDescription;
+    }
+
+    public void updatePassword(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
+
+    public void updateMbti(TripMBTI mbti) {
+        this.mbti = mbti;
+    }
+
+    public void disable() {
+        this.isActive = false;
     }
 }
