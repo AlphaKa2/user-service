@@ -84,4 +84,5 @@ eureka:
 
   instance:
     prefrer-ip-address: true
+    hostname: 172.16.210.59
 
