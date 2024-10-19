@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {
                         echo "CONFIG_ADDRESS: ${CONFIG_ADDRESS}"
-                        sh './gradlew clean build -Dspring.profiles.active=develop -Dspring.config.import=configserver:${CONFIG_ADDRESS} --no-daemon'
+                        sh './gradlew clean build -Dspring.profiles.active=develop -Dspring.config.import=configserver:\$CONFIG_ADDRESS --no-daemon'
                 }
             }
         }
