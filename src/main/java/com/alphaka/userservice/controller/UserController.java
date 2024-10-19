@@ -79,12 +79,7 @@ public class UserController {
     @GetMapping("/{nickname}/exist")
     public ApiResponse<Boolean> nicknameValidation(@PathVariable("nickname") String nickname) {
 
-        try {
-            userService.findUserByNickname(nickname);
-        } catch (EmailDuplicationException exception) {
-            return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                    false);
-        }
+        userService.checkNicknameDuplication(nickname);
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 true);
