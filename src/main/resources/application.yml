@@ -82,3 +82,6 @@ eureka:
     service-url:
       defaultZone: "${alphaka.eureka.url}"
 
+  instance:
+    prefrer-ip-address: true
+
