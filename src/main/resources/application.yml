@@ -3,15 +3,10 @@ server:
   port: 8001
 
 spring:
-  config:
-    import: file:.env[.properties]
   application:
     name: user-service
 
   datasource:
-    url: "${DB_URL}"
-    username: "${DB_USERNAME}"
-    password: "${DB_PASSWORD}"
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -24,7 +19,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
   kafka:
-    bootstrap-servers: "${BROKER_URL}"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -34,12 +28,57 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
 
-#유레카 클라이언트 등록
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
-    service-url:
-      defaultZone: "${EUREKA_URL}"
 
+# local 프로필
+---
+spring:
+
+  cloud:
+    config:
+      enabled: false
+
+  config:
+    import: optional:file:.env[.properties]
+    activate:
+      on-profile: local
+
+
+  datasource:
+    url: "${DB_URL}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+
+  kafka:
+    bootstrap-servers: "${BROKER_URL}"
+
+
+# develop 프로필
+---
+spring:
+  config:
+    activate:
+      on-profile: develop
+    import: "${config-service-url}"
+
+  cloud:
+    config:
+      name: user-service
+      profile: develop
+
+  datasource:
+    url: "${alphaka.mysql.datasource.url}"
+    username: "${alphaka.mysql.username}"
+    password: "${alphaka.mysql.password}"
+
+  kafka:
+    bootstrap-servers: "${alphaka.kafka.bootstrap-servers}"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: "${alphaka.eureka.url}"
 
