@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub-credential-alphaka') {
-                        sh 'docker build --build-arg -t alphaka/user-service:latest .'
+                        sh 'docker build -t alphaka/user-service:latest .'
 
                     }
                 }
