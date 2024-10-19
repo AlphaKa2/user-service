@@ -62,7 +62,7 @@ spring:
   config:
     activate:
       on-profile: develop
-    import: "${config-service-url}"
+    import: configserver:http://172.16.210.60:8888
 
   cloud:
     config:
