@@ -39,7 +39,10 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh 'docker push alphaka/user-service:latest'
+                    withDockerRegistry(credentialsId: 'dockerhub-credential-alphaka') {
+                        sh 'docker push alphaka/user-service:latest'
+
+                    }
                 }
             }
         }
