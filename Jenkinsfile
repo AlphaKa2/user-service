@@ -2,10 +2,6 @@ pipeline {
 
     agent any
 
-    environment {
-        CONFIG_ADDRESS = credentials('config-service-address')
-    }
-
     tools {
         jdk 'jdk17'
     }
@@ -22,8 +18,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 script {
-                        echo "CONFIG_ADDRESS: ${CONFIG_ADDRESS}"
-                        sh './gradlew clean build -Dspring.profiles.active=develop -Dspring.config.import=configserver:\$CONFIG_ADDRESS --no-daemon'
+                        sh './gradlew clean build -Dspring.profiles.active=develop --no-daemon'
                 }
             }
         }
@@ -34,7 +29,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub-credential-alphaka') {
-                        sh 'docker build --build-arg CONFIG_ADDRESS_ARG=\$CONFIG_ADDRESS -t alphaka/user-service:latest .'
+                        sh 'docker build --build-arg -t alphaka/user-service:latest .'
 
                     }
                 }
