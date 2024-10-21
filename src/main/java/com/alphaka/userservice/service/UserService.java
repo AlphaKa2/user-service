@@ -102,6 +102,18 @@ public class UserService {
                 .orElseThrow(NicknameDuplicationException::new);
     }
 
+    public void checkNicknameDuplication(String nickname) {
+        if (userRepository.findByNickname(nickname).isPresent()) {
+            throw new NicknameDuplicationException();
+        }
+    }
+
+    public void checkEmailDuplication(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailDuplicationException();
+        }
+    }
+
     @Transactional
     public void disableUser(String email) {
         User user = userRepository.findByEmail(email).get();

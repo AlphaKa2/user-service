@@ -76,19 +76,24 @@ public class UserController {
 
 
     //닉네임 중복체크, 닉네임이 중복이 아니라면 true 리턴
-    @GetMapping("/{nickname}/exist")
+    @GetMapping("/nickname/{nickname}/exist")
     public ApiResponse<Boolean> nicknameValidation(@PathVariable("nickname") String nickname) {
 
-        try {
-            userService.findUserByNickname(nickname);
-        } catch (EmailDuplicationException exception) {
-            return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                    false);
-        }
+        userService.checkNicknameDuplication(nickname);
 
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 true);
     }
+
+    @GetMapping("/email/{email}/exist")
+    public ApiResponse<Boolean> emailValidation(@PathVariable("email") String email) {
+
+        userService.checkEmailDuplication(email);
+
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                true);
+    }
+
 
     @GetMapping("/{userId}/profile")
     public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
@@ -99,7 +104,7 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public ApiResponse<UserInfoResponse> userInfoByNickname(
+    public ApiResponse<UserInfoResponse> userInfoByIdOrNickname(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "nickname", required = false) String nickname) {
 
