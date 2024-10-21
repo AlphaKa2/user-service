@@ -108,6 +108,12 @@ public class UserService {
         }
     }
 
+    public void checkEmailDuplication(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailDuplicationException();
+        }
+    }
+
     @Transactional
     public void disableUser(String email) {
         User user = userRepository.findByEmail(email).get();
