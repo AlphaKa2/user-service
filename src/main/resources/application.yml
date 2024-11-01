@@ -26,25 +26,20 @@ spring:
       group-id: account-disable-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      auto-offset-reset: earliest
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
+      auto-offset-reset: latest
 
 # local 프로필
 ---
 spring:
 
-  cloud:
-    config:
-      enabled: false
-
   config:
     import: optional:file:.env[.properties]
     activate:
       on-profile: local
+
+  cloud:
+    kubernetes:
+      enabled: false
 
 
   datasource:
@@ -55,6 +50,10 @@ spring:
   kafka:
     bootstrap-servers: "${BROKER_URL}"
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
 
 # develop 프로필
 ---
@@ -62,26 +61,20 @@ spring:
   config:
     activate:
       on-profile: develop
-    import: configserver:http://172.16.210.60:8888
-
-  cloud:
-    config:
-      name: user-service
-      profile: develop
 
   datasource:
-    url: "${alphaka.mysql.datasource.url}"
-    username: "${alphaka.mysql.username}"
-    password: "${alphaka.mysql.password}"
+    url: "${MYSQL_URL}/user_service"
+    username: "${MYSQL_USERNAME}"
+    password: "${MYSQL_PASSWORD}"
 
   kafka:
-    bootstrap-servers: "${alphaka.kafka.bootstrap-servers}"
+    bootstrap-servers: "${KAFKA_BROKER_SERVER}"
 
 eureka:
   client:
-    service-url:
-      defaultZone: "${alphaka.eureka.url}"
+    enabled: false
 
-  instance:
-    hostname: 172.16.210.59
-
+logging:
+  level:
+    org.springframework.cloud.kubernetes: DEBUG
+    io.kubernetes.client: DEBUG
