@@ -28,6 +28,14 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: latest
 
+logging:
+  pattern:
+    console:  >
+      %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} 
+      %highlight(%5level) 
+      %magenta(${PID:-}) --- [%15.15thread] [%X{trace.id:-}] 
+      %cyan(%logger{36}) : %msg
+
 # local 프로필
 ---
 spring:
@@ -54,6 +62,9 @@ eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
+  instance:
+    metadata-map:
+      instanceName: ${spring.application.name}
 
 # develop 프로필
 ---
