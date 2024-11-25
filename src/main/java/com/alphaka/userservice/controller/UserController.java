@@ -43,7 +43,7 @@ public class UserController {
     public ApiResponse<UserSignInResponse> user(@PathVariable Long userId) {
 
         log.info("인증서비스 accessToken 재발급 위한 유저 {} 정보 조회 요청", userId);
-        User user = userService.findUserById(userId);
+        User user = userService.getUserByIdOrThrow(userId);
 
         log.info("인증서비스 accessToken 재발급 위한 유저 {} 정보 조회 성공", userId);
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
@@ -111,7 +111,7 @@ public class UserController {
     @GetMapping("/{userId}/profile")
     public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
         log.info("사용자 프로필 조회 요청");
-        User user = userService.findUserById(userId);
+        User user = userService.getUserByIdOrThrow(userId);
 
         log.info("사용자 프로필 조회 성공");
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
@@ -135,7 +135,7 @@ public class UserController {
     @GetMapping("/{userId}/details")
     public ApiResponse<UserDetailsResponse> userDetails(@PathVariable("userId") Long userId) {
         log.info("사용자 상세 정보 조회 요청");
-        User user = userService.findUserById(userId);
+        User user = userService.getUserByIdOrThrow(userId);
 
         log.info("사용자 상세 정보 조회 성공");
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
