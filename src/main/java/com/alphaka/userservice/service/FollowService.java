@@ -9,9 +9,11 @@ import com.alphaka.userservice.repository.FollowRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,6 +28,7 @@ public class FollowService {
         User targetUser = userService.findUserById(targetUserId);
 
         if (userId.equals(targetUserId)) {
+            log.error("유저 자신을 팔로우할 수 없습니다.");
             throw new InvalidFollowRequestException();
         }
 
@@ -35,6 +38,7 @@ public class FollowService {
 
         // 이미 팔로우를 하고 있는 경우
         if (maybeFollow.isPresent()) {
+            log.error("이미 팔로우하고 있는 유저입니다.");
             throw new InvalidFollowRequestException();
         }
 
@@ -55,6 +59,7 @@ public class FollowService {
         User targetUser = userService.findUserById(targetUserId);
 
         if (userId.equals(targetUserId)) {
+            log.error("유저 자신을 언팔로우할 수 없습니다.");
             throw new InvalidUnfollowRequestException();
         }
 

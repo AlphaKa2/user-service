@@ -6,6 +6,7 @@ import com.alphaka.userservice.service.FollowService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -26,8 +28,10 @@ public class FollowController {
     @ResponseBody
     public ApiResponse<String> follow(@PathVariable("targetUserId") Long targetUserId,
                                       AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("유저 {}의 유저 {} 팔로우 요청", authenticatedUserInfo.getId(), targetUserId);
         followService.follow(authenticatedUserInfo.getId(), targetUserId);
 
+        log.info("유저 {}의 유저 {} 팔로우 요청 성공", authenticatedUserInfo.getId(), targetUserId);
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
@@ -35,8 +39,10 @@ public class FollowController {
     @ResponseBody
     public ApiResponse<String> unfollow(@PathVariable("targetUserId") Long targetUserId,
                                         AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("유저 {}의 유저 {} 언팔로우 요청", authenticatedUserInfo.getId(), targetUserId);
         followService.unfollow(authenticatedUserInfo.getId(), targetUserId);
 
+        log.info("유저 {}의 유저 {} 언팔로우 요청 성공", authenticatedUserInfo.getId(), targetUserId);
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
@@ -44,8 +50,10 @@ public class FollowController {
     @GetMapping("/{userId}/following")
     @ResponseBody
     public ApiResponse<List<UserInfoResponse>> following(@PathVariable("userId") Long userId) {
+        log.info("유저 {}의 팔로잉 목록 조회 요청", userId);
         List<UserInfoResponse> followings = followService.followings(userId);
 
+        log.info("유저 {}의 팔로잉 목록 조회 요청 성공", userId);
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), followings);
     }
 
@@ -53,8 +61,10 @@ public class FollowController {
     @GetMapping("/{userId}/follower")
     @ResponseBody
     public ApiResponse<List<UserInfoResponse>> follower(@PathVariable("userId") Long userId) {
+        log.info("유저 {}의 팔로워 목록 조회 요청", userId);
         List<UserInfoResponse> followers = followService.followers(userId);
 
+        log.info("유저 {}의 팔로워 목록 조회 요청 성공", userId);
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), followers);
     }
 
