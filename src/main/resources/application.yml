@@ -2,6 +2,12 @@
 server:
   port: 8001
 
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha # API 메서드 순서를 코드 정의 순으로 정렬
+  api-docs:
+    path: v3/api-docs
+
 spring:
   application:
     name: user-service
@@ -27,6 +33,9 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: latest
+
+gateway:
+  url: http://127.0.0.1:8000
 
 logging:
   pattern:
@@ -84,6 +93,9 @@ spring:
 eureka:
   client:
     enabled: false
+
+gateway:
+  url: "${GATEWAY_URL}"
 
 logging:
   level:
