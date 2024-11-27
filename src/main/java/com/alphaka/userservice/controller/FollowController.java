@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class FollowController {
+public class FollowController implements FollowApi {
 
     private final FollowService followService;
 
+    @Override
     @PostMapping("/{targetUserId}/following")
     @ResponseBody
     public ApiResponse<String> follow(@PathVariable("targetUserId") Long targetUserId,
@@ -35,6 +36,7 @@ public class FollowController {
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @DeleteMapping("/{targetUserId}/following")
     @ResponseBody
     public ApiResponse<String> unfollow(@PathVariable("targetUserId") Long targetUserId,
@@ -47,6 +49,7 @@ public class FollowController {
     }
 
     //사용자의 팔로잉 목록
+    @Override
     @GetMapping("/{userId}/following")
     @ResponseBody
     public ApiResponse<List<UserInfoResponse>> following(@PathVariable("userId") Long userId) {
@@ -58,6 +61,7 @@ public class FollowController {
     }
 
     //사용자의 팔로워 목록
+    @Override
     @GetMapping("/{userId}/follower")
     @ResponseBody
     public ApiResponse<List<UserInfoResponse>> follower(@PathVariable("userId") Long userId) {

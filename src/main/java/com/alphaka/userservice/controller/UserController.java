@@ -34,13 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-public class UserController {
+public class UserController implements UserApi {
 
     private final UserService userService;
 
     //accessToken 재발급 시 사용
+    @Override
     @GetMapping("/{userId}")
-    public ApiResponse<UserSignInResponse> user(@PathVariable Long userId) {
+    public ApiResponse<UserSignInResponse> user(@PathVariable("userId") Long userId) {
 
         log.info("인증서비스 accessToken 재발급 위한 유저 {} 정보 조회 요청", userId);
         User user = userService.getUserByIdOrThrow(userId);
@@ -51,6 +52,7 @@ public class UserController {
     }
 
     // 자체 회원가입
+    @Override
     @PostMapping("/join")
     public ApiResponse<String> join(@RequestBody @Valid UserSignUpRequest userSignUpRequest) {
 
@@ -63,6 +65,7 @@ public class UserController {
 
 
     // 인증 서비스에서 OAuth2 로그인 시
+    @Override
     @PostMapping("/oauth2/signin")
     public ApiResponse<UserSignInResponse> oauth2SignIn(@RequestBody @Valid OAuth2SignInRequest oAuth2SignInRequest) {
         log.info("사용자 OAuth2 인증 요청");
@@ -75,6 +78,7 @@ public class UserController {
 
 
     // 인증 서비스에서 자체 로그인 시
+    @Override
     @PostMapping("/signin")
     public ApiResponse<UserSignInResponse> signIn(@RequestBody @Valid UserSignInRequest userSignInRequest) {
         log.info("사용자 인증 요청");
@@ -87,27 +91,28 @@ public class UserController {
 
 
     //닉네임 중복체크, 닉네임이 중복이 아니라면 true 리턴
+    @Override
     @GetMapping("/nickname/{nickname}/exist")
-    public ApiResponse<Boolean> nicknameValidation(@PathVariable("nickname") String nickname) {
+    public ApiResponse<String> nicknameValidation(@PathVariable("nickname") String nickname) {
         log.info("닉네임 중복 검사 요청");
         userService.checkNicknameDuplication(nickname);
 
         log.info("닉네임 중복 검사 통과");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                true);
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @GetMapping("/email/{email}/exist")
-    public ApiResponse<Boolean> emailValidation(@PathVariable("email") String email) {
+    public ApiResponse<String> emailValidation(@PathVariable("email") String email) {
         log.info("이메일 중복 검사 요청");
         userService.checkEmailDuplication(email);
 
         log.info("이메일 중복 검사 통과");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                true);
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
 
+    @Override
     @GetMapping("/{userId}/profile")
     public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
         log.info("사용자 프로필 조회 요청");
@@ -118,20 +123,22 @@ public class UserController {
                 UserProfileResponse.fromUser(user));
     }
 
+    @Override
     @GetMapping("/info")
     public ApiResponse<UserInfoResponse> userInfoByIdOrNickname(
-            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "nickname", required = false) String nickname) {
 
         log.info("블로그 서비스 사용자 정보 조회 요청");
 
-        User user = userService.findUserByIdOrNickname(id, nickname);
+        User user = userService.findUserByIdOrNickname(userId, nickname);
 
         log.info("블로그 서비스 사용자 정보 조회 요청 성공");
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 UserInfoResponse.fromUser(user));
     }
 
+    @Override
     @GetMapping("/{userId}/details")
     public ApiResponse<UserDetailsResponse> userDetails(@PathVariable("userId") Long userId) {
         log.info("사용자 상세 정보 조회 요청");
@@ -142,6 +149,7 @@ public class UserController {
                 UserDetailsResponse.fromUser(user));
     }
 
+    @Override
     @PutMapping("/{userId}/details")
     @ResponseBody
     public ApiResponse<String> updateUserDetails(@PathVariable("userId") Long userId,
@@ -154,6 +162,7 @@ public class UserController {
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @PutMapping("/{userId}/password")
     @ResponseBody
     public ApiResponse<String> updateUserPassword(@PathVariable("userId") Long userId,
@@ -166,11 +175,12 @@ public class UserController {
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @PutMapping("/{userId}/mbti")
     @ResponseBody
-    public ApiResponse<String> updateUserPassword(@PathVariable("userId") Long userId,
-                                                  @RequestBody @Valid TripMbtiUpdateRequest tripMbtiUpdateRequest,
-                                                  AuthenticatedUserInfo authenticatedUserInfo) {
+    public ApiResponse<String> updateUserMbti(@PathVariable("userId") Long userId,
+                                              @RequestBody @Valid TripMbtiUpdateRequest tripMbtiUpdateRequest,
+                                              AuthenticatedUserInfo authenticatedUserInfo) {
         log.info("사용자 여행 MBTI 업데이트 요청");
         userService.updateMbti(userId, tripMbtiUpdateRequest, authenticatedUserInfo);
 
@@ -178,6 +188,7 @@ public class UserController {
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @GetMapping
     public ApiResponse<List<UserInfoResponse>> getUserList(@RequestParam("userIds") Set<Long> userIds) {
         log.info("블로그 서비스 사용자들 리스트 정보 조회 요청");
