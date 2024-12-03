@@ -185,7 +185,7 @@ public interface UserApi {
                     )
             }
     )
-    @ApiSuccessResponseExample(responseClass = UserProfileResponse.class, data = false, status = HttpStatus.OK)
+    @ApiSuccessResponseExample(responseClass = UserProfileResponse.class, data = true, status = HttpStatus.OK)
     @ApiErrorResponseExamples(
             value = {USER_NOT_FOUND},
             name = {"사용자 없음"},

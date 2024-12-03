@@ -235,10 +235,6 @@ public class SwaggerConfig {
     private Object generateExampleInstance(Class<?> clazz) {
         try {
 
-            if (Collection.class.isAssignableFrom(clazz)) {
-
-
-            }
             Object instance = clazz.getDeclaredConstructor().newInstance();
 
             Field[] fields = clazz.getDeclaredFields();

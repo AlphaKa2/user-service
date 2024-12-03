@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class ApiResponse<T> {
 
     // Http status
-    private int code;
+    private int status;
 
     @Nullable
     private T data;
@@ -25,16 +25,16 @@ public class ApiResponse<T> {
     @Nullable
     private String message;
 
-    public static <T> ApiResponse<T> createSuccessResponseWithData(int code, T data) {
+    public static <T> ApiResponse<T> createSuccessResponseWithData(int status, T data) {
         return ApiResponse.<T>builder()
-                .code(code)
+                .status(status)
                 .data(data)
                 .build();
     }
 
-    public static <T> ApiResponse<T> createSuccessResponse(int code) {
+    public static <T> ApiResponse<T> createSuccessResponse(int status) {
         return ApiResponse.<T>builder()
-                .code(code)
+                .status(status)
                 .data(null)
                 .message(null)
                 .build();
