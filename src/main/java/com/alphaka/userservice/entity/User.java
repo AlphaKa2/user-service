@@ -112,6 +112,10 @@ public class User extends BaseEntity {
         this.mbti = mbti;
     }
 
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
+    }
+
     public void disable() {
         this.isActive = false;
     }

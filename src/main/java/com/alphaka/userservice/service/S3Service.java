@@ -1,7 +1,10 @@
 package com.alphaka.userservice.service;
 
+import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
 import com.alphaka.userservice.dto.response.S3PresignedUrlResponse;
+import com.alphaka.userservice.exception.custom.InvalidProfileImgaeUrlException;
+import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
@@ -46,6 +49,16 @@ public class S3Service {
         log.info("업로드 URL:{}", uploadUrl);
 
         return new S3PresignedUrlResponse(uploadUrl.toString());
+    }
+
+    public void verifyProfileImageUrl(String url) {
+        log.info("새 프로필 이미지 경로({})를 검증합니다.", url);
+        String prefix = String.format("https://%s.s3.amazonaws.com/profile", bucketName);
+
+        if (!url.startsWith(prefix)) {
+            log.error("유효하지 않은 이미지 경로입니다.");
+            throw new InvalidProfileImgaeUrlException();
+        }
     }
 
 }

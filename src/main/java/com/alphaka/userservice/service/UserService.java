@@ -2,6 +2,7 @@ package com.alphaka.userservice.service;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
@@ -37,8 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
+    private final UserRepository userRepository;
     private final UserSignupProducerService userSignupProducerService;
 
     public User getUserByIdOrThrow(Long userId) {
@@ -210,6 +212,22 @@ public class UserService {
         return users.stream()
                 .map(UserInfoResponse::fromUser)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateProfileImageUrl(
+            Long userId,
+            ProfileImageUrlUpdateRequest profileImageUrlUpdateRequest,
+            AuthenticatedUserInfo authenticatedUserInfo) {
+        String url = profileImageUrlUpdateRequest.getProfileImageUrl();
+
+        verifyUserAuthorization(userId, authenticatedUserInfo);
+
+        s3Service.verifyProfileImageUrl(url);
+
+        User user = getUserByIdOrThrow(userId);
+
+        user.updateProfileImageUrl(url);
     }
 
 

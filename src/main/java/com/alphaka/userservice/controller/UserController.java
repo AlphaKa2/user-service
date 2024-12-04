@@ -2,6 +2,7 @@ package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
 import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
@@ -214,5 +215,17 @@ public class UserController implements UserApi {
         log.info("프로필 이미지를 업로드하기 위한 presignedurl 생성 완료");
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 s3PresignedUrlResponse);
+    }
+
+    @PutMapping("/{userId}/profile/image")
+    public ApiResponse<String> updateProfileImage(
+            @PathVariable("userId") Long userId,
+            @RequestBody @Valid ProfileImageUrlUpdateRequest profileImageUrlUpdateRequest,
+            AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("프로필 이미지 업데이트 요청");
+        userService.updateProfileImageUrl(userId, profileImageUrlUpdateRequest, authenticatedUserInfo);
+
+        log.info("프로필 이미지 업데이트 요청 완료");
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 }
