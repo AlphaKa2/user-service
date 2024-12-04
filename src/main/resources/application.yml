@@ -39,7 +39,7 @@ gateway:
 
 logging:
   pattern:
-    console:  >
+    console: >
       %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} 
       %highlight(%5level) 
       %magenta(${PID:-}) --- [%15.15thread] [%X{trace.id:-}] 
@@ -75,6 +75,21 @@ eureka:
     metadata-map:
       instanceName: ${spring.application.name}
 
+cloud:
+  aws:
+    bucket: "${AWS_BUCKET}"
+    stack:
+      auto: false
+    region:
+      static: "${AWS_REGION}"
+    credentials:
+      accessKey: "${AWS_ACCESSKEY}"
+      secretKey: "${AWS_SECRETKEY}"
+
+user:
+  profile:
+    defaultImageUrl: "${DEFAULT_PROFILE_IMAGE_URL}"
+
 # develop 프로필
 ---
 spring:
@@ -96,6 +111,21 @@ eureka:
 
 gateway:
   url: "${GATEWAY_URL}"
+
+cloud:
+  aws:
+    bucket: "${AWS_BUCKET}"
+    stack:
+      auto: false
+    region:
+      static: "${AWS_REGION}"
+    credentials:
+      accessKey: "${AWS_ACCESSKEY}"
+      secretKey: "${AWS_SECRETKEY}"
+
+user:
+  profile:
+    defaultImageUrl: "${DEFAULT_PROFILE_IMAGE_URL}"
 
 logging:
   level:

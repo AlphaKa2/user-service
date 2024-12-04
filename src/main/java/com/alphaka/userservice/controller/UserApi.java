@@ -5,11 +5,14 @@ import static com.alphaka.userservice.exception.ErrorCode.*;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
+import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
 import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
+import com.alphaka.userservice.dto.response.S3PresignedUrlResponse;
 import com.alphaka.userservice.dto.response.UserDetailsResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.dto.response.UserProfileResponse;
@@ -76,9 +79,9 @@ public interface UserApi {
     )
     @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.CREATED)
     @ApiErrorResponseExamples(
-            value = {EMAIL_DUPLICATION, NICKNAME_DUPLICATION},
-            name = {"이메일 중복", "닉네임 중복"},
-            description = {"증복된 이메일입니다.", "닉네임 중복입니다."}
+            value = {EMAIL_DUPLICATION, NICKNAME_DUPLICATION, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+            name = {"이메일 중복", "닉네임 중복", "역직렬화 실패", "검증 실패"},
+            description = {"증복된 이메일입니다.", "닉네임 중복입니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
     )
     ApiResponse<String> join(@RequestBody @Valid UserSignUpRequest userSignUpRequest);
 
@@ -180,7 +183,7 @@ public interface UserApi {
                             description = "사용자의 고유한 ID",
                             required = true,
                             example = "1",
-                            in = ParameterIn.PATH, // PathVariable임을 명시
+                            in = ParameterIn.PATH,
                             schema = @Schema(type = "integer", format = "int64")
                     )
             }
@@ -203,7 +206,7 @@ public interface UserApi {
                             description = "사용자의 고유한 ID",
                             required = false,
                             example = "1",
-                            in = ParameterIn.QUERY, //
+                            in = ParameterIn.QUERY,
                             schema = @Schema(type = "integer", format = "int64")
                     ),
                     @Parameter(
@@ -211,7 +214,7 @@ public interface UserApi {
                             description = "사용자의 고유한 닉네임",
                             required = false,
                             example = "userA",
-                            in = ParameterIn.QUERY, // PathVariable임을 명시
+                            in = ParameterIn.QUERY,
                             schema = @Schema(type = "string")
                     )
             }
@@ -347,7 +350,7 @@ public interface UserApi {
     @ApiErrorResponseExamples(
             value = {UNAUTHORIZED_ACCESS_REQUEST, UNAUTHENTICATED_USER_REQUEST, USER_NOT_FOUND,
                     INVALID_MBTI_REQUEST, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
-            name = {"권한 없음", "인증되지 않은 사용자", "사용자 없음", "잘못된 MBTI", "닉네임 중복", "역직렬화 실패", "검증 실패"},
+            name = {"권한 없음", "인증되지 않은 사용자", "사용자 없음", "잘못된 MBTI", "역직렬화 실패", "검증 실패"},
             description = {"권한이 없는 요청입니다.", "인증이 필요합니다.", "존재하지 않는 사용자입니다.",
                     "존재하지 않는 MBTI입니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
     )
@@ -384,4 +387,65 @@ public interface UserApi {
             description = {"역직렬화에 실패했습니다."}
     )
     ApiResponse<List<UserInfoResponse>> getUserList(@RequestParam("userIds") Set<Long> userIds);
+
+    @Operation(
+            summary = "S3 presigned url 생성",
+            description = " 이미지 업로드가 가능한 S3 presigned url을 생성하는 API입니다.\n accessToken이 필요합니다.",
+            tags = {"External API"},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "S3 presigned url 생성 요청 데이터",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = S3PresignedUrlRequest.class)
+                    )
+            )
+    )
+    @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.OK)
+    @ApiErrorResponseExamples(
+            value = {GENERATING_PRESIGEND_URL_FAILURE, UNAUTHENTICATED_USER_REQUEST,
+                    DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+            name = {"URL 생성 실패", "인증되지 않은 사용자", "역직렬화 실패", "검증 실패"},
+            description = {"presigned url 생성 중 문제가 발생했습니다.", "인증이 필요합니다.",
+                    "역직렬화에 실페하였습니다.", "검증에 실패하였습니다."}
+    )
+    ApiResponse<S3PresignedUrlResponse> getPresignedUrl(
+            @RequestBody @Valid S3PresignedUrlRequest s3PresignedUrlRequest,
+            AuthenticatedUserInfo authenticatedUserInfo);
+
+    @Operation(
+            summary = "사용자 프로필 이미지 업데이트",
+            description = " 사용자의 프로필 이미지를 업데이트하는 API입니다..\n accessToken이 필요합니다.",
+            tags = {"External API"},
+            parameters = {
+                    @Parameter(
+                            name = "userId",
+                            description = "사용자의 고유한 ID",
+                            required = true,
+                            example = "1",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "integer", format = "int64")
+                    )
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "사용자 프로필 이미지 업데이트 요청 데이터",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProfileImageUrlUpdateRequest.class)
+                    )
+            )
+    )
+    @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.OK)
+    @ApiErrorResponseExamples(
+            value = {UNAUTHORIZED_ACCESS_REQUEST, UNAUTHENTICATED_USER_REQUEST, USER_NOT_FOUND,
+                    INVALID_PROFILE_IMAGE_URL, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+            name = {"권한 없음", "인증되지 않은 사용자", "사용자 없음", "잘못된 url 경로", "역직렬화 실패", "검증 실패"},
+            description = {"권한이 없는 요청입니다.", "인증이 필요합니다.", "존재하지 않는 사용자입니다.",
+                    "유효하지 않은 url입니.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
+    )
+    ApiResponse<String> updateProfileImage(
+            @PathVariable("userId") Long userId,
+            @RequestBody @Valid ProfileImageUrlUpdateRequest profileImageUrlUpdateRequest,
+            AuthenticatedUserInfo authenticatedUserInfo);
 }
