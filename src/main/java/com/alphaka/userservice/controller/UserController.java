@@ -205,6 +205,7 @@ public class UserController implements UserApi {
     }
 
 
+    @Override
     @PostMapping("/profile/presigned-url")
     public ApiResponse<S3PresignedUrlResponse> getPresignedUrl(
             @RequestBody @Valid S3PresignedUrlRequest s3PresignedUrlRequest,
@@ -217,6 +218,7 @@ public class UserController implements UserApi {
                 s3PresignedUrlResponse);
     }
 
+    @Override
     @PutMapping("/{userId}/profile/image")
     public ApiResponse<String> updateProfileImage(
             @PathVariable("userId") Long userId,
