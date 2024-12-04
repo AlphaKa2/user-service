@@ -2,16 +2,19 @@ package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
+import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
 import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
+import com.alphaka.userservice.dto.response.S3PresignedUrlResponse;
 import com.alphaka.userservice.dto.response.UserDetailsResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.User;
+import com.alphaka.userservice.service.S3Service;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import jakarta.validation.Valid;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController implements UserApi {
 
     private final UserService userService;
+    private final S3Service s3Service;
 
     //accessToken 재발급 시 사용
     @Override
@@ -199,4 +203,16 @@ public class UserController implements UserApi {
                 userList);
     }
 
+
+    @PostMapping("/profile/presigned-url")
+    public ApiResponse<S3PresignedUrlResponse> getPresignedUrl(
+            @RequestBody @Valid S3PresignedUrlRequest s3PresignedUrlRequest,
+            AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("프로필 이미지를 업로드하기 위한 presignedurl 생성 요청");
+        S3PresignedUrlResponse s3PresignedUrlResponse = s3Service.generatePreSignedUrl(s3PresignedUrlRequest);
+
+        log.info("프로필 이미지를 업로드하기 위한 presignedurl 생성 완료");
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
+                s3PresignedUrlResponse);
+    }
 }

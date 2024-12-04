@@ -1,5 +1,6 @@
 package com.alphaka.userservice.entity;
 
+import com.alphaka.userservice.config.UserConfig;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,8 +54,7 @@ public class User extends BaseEntity {
     private LocalDate birth;
 
     @Column(nullable = false)
-    @Builder.Default
-    private String profileImage = "/img/default";
+    private String profileImage;
 
     // 유저의 팔로잉 리스트(1:N 관계)
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -113,5 +114,12 @@ public class User extends BaseEntity {
 
     public void disable() {
         this.isActive = false;
+    }
+
+    @PrePersist
+    public void setDefaultProfileImage() {
+        if (this.profileImage == null) {
+            this.profileImage = UserConfig.defaultProfileImage;
+        }
     }
 }
