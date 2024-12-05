@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,18 @@ public class FollowController implements FollowApi {
 
         log.info("유저 {}의 유저 {} 언팔로우 요청 성공", authenticatedUserInfo.getId(), targetUserId);
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
+    }
+
+    //사용자의 타겟 유저 팔로우 여부
+    @GetMapping("/follow/status")
+    @ResponseBody
+    public ApiResponse<Boolean> followStatus(@RequestParam("userId") Long userId,
+                                             AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("유저 {}의 유저 {} 팔로우 여부 조회 요청", authenticatedUserInfo.getId(),userId);
+        boolean isFollowing = followService.isFollowing(authenticatedUserInfo.getId(), userId);
+
+        log.info("팔로잉 여부:{}", isFollowing);
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), isFollowing);
     }
 
     //사용자의 팔로잉 목록

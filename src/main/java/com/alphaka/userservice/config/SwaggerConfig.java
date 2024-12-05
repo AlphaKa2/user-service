@@ -45,6 +45,7 @@ public class SwaggerConfig {
     private final ObjectMapper objectMapper;
     @Value("${gateway.url}")
     private String baseUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
 
@@ -128,7 +129,10 @@ public class SwaggerConfig {
 
             //예시 객체 생성
             Object exampleInstance;
-            if (Collection.class.isAssignableFrom(responseClass)) {
+            if (isImmutableClass(responseClass)) {
+                exampleInstance = generateImmutableInstance(responseClass);
+            }
+            else if (Collection.class.isAssignableFrom(responseClass)) {
                 Collection<Object> collectionInstance = createCollectionInstance(responseClass);
                 Object genericExampleInstace = generateExampleInstance(genericType);
                 collectionInstance.add(genericExampleInstace);
@@ -300,6 +304,18 @@ public class SwaggerConfig {
             // 기본적으로 ArrayList 사용
             return new ArrayList<>();
         }
+    }
+
+    private boolean isImmutableClass(Class<?> clazz) {
+        return clazz.equals(Integer.class) || clazz.equals(Boolean.class)
+                || clazz.equals(String.class) || clazz.equals(Long.class);
+    }
+
+    private Object generateImmutableInstance(Class<?> clazz) {
+        if (clazz.equals(Integer.class) || clazz.equals(Long.class)) return 1;
+        if (clazz.equals(Boolean.class)) return true;
+        if (clazz.equals(String.class)) return "example";
+        return null;
     }
 
 }

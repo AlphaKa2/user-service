@@ -92,5 +92,12 @@ public class FollowService {
         return followRepository.findFollowersByUserId(user.getId());
     }
 
+    public boolean isFollowing(Long userId, Long targetUserId) {
+        User user = userService.getUserByIdOrThrow(userId);
+        User targetUser = userService.getUserByIdOrThrow(targetUserId);
+
+        return followRepository.findByFollowerAndFollowed(user, targetUser).isPresent();
+    }
+
 
 }
