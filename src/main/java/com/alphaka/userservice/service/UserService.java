@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -228,6 +227,13 @@ public class UserService {
         User user = getUserByIdOrThrow(userId);
 
         user.updateProfileImageUrl(url);
+    }
+
+    @Transactional
+    public void deleteAccount(AuthenticatedUserInfo authenticatedUserInfo) {
+        User user = getUserByIdOrThrow(authenticatedUserInfo.getId());
+
+        user.delete();
     }
 
 

@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -29,6 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "Users")
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseEntity {
 
     @Id
@@ -116,8 +118,14 @@ public class User extends BaseEntity {
         this.profileImage = profileImageUrl;
     }
 
+    // 계정 잠김
     public void disable() {
         this.isActive = false;
+    }
+
+    // 계정 소프트 딜리트
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
 
     @PrePersist
