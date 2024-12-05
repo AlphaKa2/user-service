@@ -254,7 +254,7 @@ public interface UserApi {
 
     @Operation(
             summary = "사용자 상세 정보 업데이트",
-            description = "사용자 상세 정보 중, 닉네임, 프로필 메시지를 업데이트하는 API입니다.",
+            description = "사용자 상세 정보 중, 닉네임, 프로필 메시지를 업데이트하는 API입니다. accssToken이 필요합니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
@@ -262,7 +262,7 @@ public interface UserApi {
                             description = "사용자의 고유한 ID",
                             required = true,
                             example = "1",
-                            in = ParameterIn.PATH, // PathVariable임을 명시
+                            in = ParameterIn.PATH,
                             schema = @Schema(type = "integer", format = "int64")
                     )
             },
@@ -289,7 +289,7 @@ public interface UserApi {
 
     @Operation(
             summary = "사용자 비밀번호 업데이트",
-            description = "사용자의 비밀번호를 업데이트하는 API입니다.",
+            description = "사용자의 비밀번호를 업데이트하는 API입니다. accessToken이 필요합니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
@@ -325,7 +325,7 @@ public interface UserApi {
 
     @Operation(
             summary = "사용자 여행 MBTI 업데이트",
-            description = "사용자의 여행 MBTI를 업데이트하는 API입니다.",
+            description = "사용자의 여행 MBTI를 업데이트하는 API입니다. accessToken이 필요합니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
