@@ -18,12 +18,14 @@ import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.service.S3Service;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -228,6 +230,16 @@ public class UserController implements UserApi {
         userService.updateProfileImageUrl(userId, profileImageUrlUpdateRequest, authenticatedUserInfo);
 
         log.info("프로필 이미지 업데이트 요청 완료");
+        return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
+    }
+
+    @Override
+    @DeleteMapping("/account")
+    public ApiResponse<String> deleteAccount(@Parameter(hidden = true) AuthenticatedUserInfo authenticatedUserInfo) {
+        log.info("회원 {}의 탈퇴 요청", authenticatedUserInfo.getId());
+        userService.deleteAccount(authenticatedUserInfo);
+
+        log.info("회원 탈퇴 완료");
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 }

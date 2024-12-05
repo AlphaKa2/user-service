@@ -415,7 +415,7 @@ public interface UserApi {
 
     @Operation(
             summary = "사용자 프로필 이미지 업데이트",
-            description = " 사용자의 프로필 이미지를 업데이트하는 API입니다..\n accessToken이 필요합니다.",
+            description = " 사용자의 프로필 이미지를 업데이트하는 API입니다.\n accessToken이 필요합니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
@@ -448,4 +448,18 @@ public interface UserApi {
             @PathVariable("userId") Long userId,
             @RequestBody @Valid ProfileImageUrlUpdateRequest profileImageUrlUpdateRequest,
             AuthenticatedUserInfo authenticatedUserInfo);
+
+
+    @Operation(
+            summary = "사용자 회원탈퇴",
+            description = " 사용자가 회원탈퇴를 요청하는 API입니다.\n accessToken이 필요합니다.",
+            tags = {"External API"}
+    )
+    @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.OK)
+    @ApiErrorResponseExamples(
+            value = {UNAUTHENTICATED_USER_REQUEST},
+            name = {"인증되지 않은 사용자"},
+            description = {"인증이 필요합니다."}
+    )
+    ApiResponse<String> deleteAccount(AuthenticatedUserInfo authenticatedUserInfo);
 }
