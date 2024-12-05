@@ -18,6 +18,7 @@ import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.service.S3Service;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -232,8 +233,9 @@ public class UserController implements UserApi {
         return ApiResponse.createSuccessResponse(HttpStatus.OK.value());
     }
 
+    @Override
     @DeleteMapping("/account")
-    public ApiResponse<String> deleteAccount(AuthenticatedUserInfo authenticatedUserInfo) {
+    public ApiResponse<String> deleteAccount(@Parameter(hidden = true) AuthenticatedUserInfo authenticatedUserInfo) {
         log.info("회원 {}의 탈퇴 요청", authenticatedUserInfo.getId());
         userService.deleteAccount(authenticatedUserInfo);
 
