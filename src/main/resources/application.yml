@@ -86,6 +86,9 @@ cloud:
       accessKey: "${AWS_ACCESSKEY}"
       secretKey: "${AWS_SECRETKEY}"
 
+jwt:
+  secretKey: "${JWT_SECRET_KEY}"
+
 user:
   profile:
     defaultImageUrl: "${DEFAULT_PROFILE_IMAGE_URL}"
@@ -122,6 +125,9 @@ cloud:
     credentials:
       accessKey: "${AWS_ACCESSKEY}"
       secretKey: "${AWS_SECRETKEY}"
+
+jwt:
+  secretKey: "${JWT_SECRETKEY}"
 
 user:
   profile:
