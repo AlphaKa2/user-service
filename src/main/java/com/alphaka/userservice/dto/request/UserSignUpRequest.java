@@ -5,6 +5,7 @@ import com.alphaka.userservice.entity.Role;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -65,6 +66,15 @@ public class UserSignUpRequest {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String password;
+
+    @NotBlank(message = "sms 인증 토큰은 필수 입력값입니다.")
+    @Schema(
+            description = "sms 인증 토큰",
+            example = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJTbXNDb25maXJtYXRpb24iLCJleHAiOjE3MzM0NjI4MjMsInBob25lTnVtYmVyIjoiMDEwMDAwMDAwMDAifQ.8Lur3HULIkGPJeqZOB1cqduqpp8DeFbCoYE3GCiv31qTV_GrOr6oi7NerhaWXkslcNKJIdECJQtWDdlw2vQmgw",
+            requiredMode = RequiredMode.REQUIRED
+
+    )
+    private String smsConfirmation;
 
     public User toEntity() {
 

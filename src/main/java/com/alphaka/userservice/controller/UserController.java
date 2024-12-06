@@ -1,6 +1,7 @@
 package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.PasswordResetRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
 import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
@@ -19,6 +20,7 @@ import com.alphaka.userservice.service.S3Service;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -204,6 +206,16 @@ public class UserController implements UserApi {
         log.info("블로그 서비스 사용자들 리스트 정보 조회 성공");
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
                 userList);
+    }
+
+    @Override
+    @PostMapping("/password/reset")
+    public ApiResponse<String> resetPassword(@RequestBody PasswordResetRequest passwordFindRequest) {
+        log.info("사용자 비밀번호 초기화 요청");
+        userService.resetPassword(passwordFindRequest);
+
+        log.info("사용자 비밀번호 초기화 성공");
+        return ApiResponse.createSuccessResponse(HttpStatus.ACCEPTED.value());
     }
 
 

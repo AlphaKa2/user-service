@@ -4,6 +4,7 @@ package com.alphaka.userservice.controller;
 import static com.alphaka.userservice.exception.ErrorCode.*;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.PasswordResetRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
 import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.S3PresignedUrlRequest;
@@ -79,9 +80,11 @@ public interface UserApi {
     )
     @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.CREATED)
     @ApiErrorResponseExamples(
-            value = {EMAIL_DUPLICATION, NICKNAME_DUPLICATION, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
-            name = {"이메일 중복", "닉네임 중복", "역직렬화 실패", "검증 실패"},
-            description = {"증복된 이메일입니다.", "닉네임 중복입니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
+            value = {EMAIL_DUPLICATION, NICKNAME_DUPLICATION, INVALID_SMS_CONFIRMATION_TOKEN,
+                    DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+            name = {"이메일 중복", "닉네임 중복", "유효하지 않은 SMS 인증 토큰","역직렬화 실패", "검증 실패"},
+            description = {"증복된 이메일입니다.", "닉네임 중복입니다.", "유효하지 않은 SMS 인증 토큰입니다.",
+                    "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
     )
     ApiResponse<String> join(@RequestBody @Valid UserSignUpRequest userSignUpRequest);
 
@@ -199,7 +202,7 @@ public interface UserApi {
     @Operation(
             summary = "블로그 서비스의 사용자 정보 조회",
             description = "블로그 서비스에서 사용자의 id 혹은 닉네임으로 사용자 정보를 조회하는 API입니다.",
-            tags = {"External API"},
+            tags = {"Internal API"},
             parameters = {
                     @Parameter(
                             name = "userId",
@@ -313,11 +316,11 @@ public interface UserApi {
     @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.OK)
     @ApiErrorResponseExamples(
             value = {UNAUTHORIZED_ACCESS_REQUEST, UNAUTHENTICATED_USER_REQUEST, USER_NOT_FOUND, UNCHANGED_NEW_PASSWORD,
-                    WRONG_PREVIOUS_PASSWORD, NICKNAME_DUPLICATION, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+                    WRONG_PREVIOUS_PASSWORD, DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
             name = {"권한 없음", "인증되지 않은 사용자", "사용자 없음", "동일한 비밀번호",
                     "잘못된 기존 비밀번호", "닉네임 중복", "역직렬화 실패", "검증 실패"},
             description = {"권한이 없는 요청입니다.", "인증이 필요합니다.", "존재하지 않는 사용자입니다.", "새 비밀번호와 기존 비밀번호가 동일합니다.",
-                    "기존 비밀번호가 틀렸습니다.", "중복된 닉네임입니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
+                    "기존 비밀번호가 틀렸습니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
     )
     ApiResponse<String> updateUserPassword(@PathVariable("userId") Long userId,
                                            @RequestBody @Valid PasswordUpdateRequest passwordUpdateRequest,
@@ -462,4 +465,27 @@ public interface UserApi {
             description = {"인증이 필요합니다."}
     )
     ApiResponse<String> deleteAccount(AuthenticatedUserInfo authenticatedUserInfo);
+
+    @Operation(
+            summary = "사용자 비밀번호 초기화",
+            description = "이메일을 기억하고, SMS 인증을 완료한 사용자가 비밀번호 초기화를 요청하는 API입니다.",
+            tags = {"External API"},
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "비밀번호 초기화 요청 데이터",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PasswordResetRequest.class)
+                    )
+            )
+    )
+    @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.ACCEPTED)
+    @ApiErrorResponseExamples(
+            value = {USER_NOT_FOUND, UNAUTHORIZED_ACCESS_REQUEST, INVALID_SMS_CONFIRMATION_TOKEN,
+                    DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
+            name = {"사용자 없음", "권한 없음", "유효하지 않은 SMS 인증 토큰", "역직렬화 실패", "검증 실패"},
+            description = {"존재하지 않는 사용자입니다.", "권한이 없습니다. 소셜 로그인 사용자는 비밀번호 변경이 불가합니다.",
+                    "유효하지 않은 SMS 인증 토큰입니다.", "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
+    )
+    ApiResponse<String> resetPassword(@RequestBody @Valid PasswordResetRequest passwordFindRequest);
 }
