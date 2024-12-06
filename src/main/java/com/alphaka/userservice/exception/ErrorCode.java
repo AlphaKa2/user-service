@@ -15,6 +15,7 @@ public enum ErrorCode {
     INVALID_FOLLOW_REQUEST(HttpStatus.BAD_REQUEST.value(), "USR009", "팔로우를 할 수 없습니다."),
     INVALID_MBTI_REQUEST(HttpStatus.BAD_REQUEST.value(), "USR009", "알 수 없는 여행 MBTI입니다."),
     INVALID_PROFILE_IMAGE_URL(HttpStatus.BAD_REQUEST.value(), "USR009", "유효하지 않은 URL입니다."),
+    INVALID_SMS_CONFIRMATION_TOKEN(HttpStatus.UNAUTHORIZED.value(), "USR016", "유효하지 않은 토큰입니다."),
     INVALID_UNFOLLOW_REQUEST(HttpStatus.BAD_REQUEST.value(), "USR009", "언팔로우를 할 수 없습니다."),
     INVALID_USER_DETAILS_UPDATE_REQUEST(HttpStatus.BAD_REQUEST.value(), "USR009", "수정이 불가능합니다."),
     NICKNAME_DUPLICATION(HttpStatus.CONFLICT.value(), "USR007", "이미 사용중인 닉네임입니다."),
