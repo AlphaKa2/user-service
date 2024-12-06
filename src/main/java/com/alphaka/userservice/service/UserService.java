@@ -67,14 +67,14 @@ public class UserService {
     }
 
     public void checkNicknameDuplication(String nickname) {
-        if (userRepository.findByNickname(nickname).isPresent()) {
+        if (userRepository.findByNicknameWithoutDeleted(nickname).isPresent()) {
             log.error("중복되는 닉네임입니다. {}", nickname);
             throw new NicknameDuplicationException();
         }
     }
 
     public void checkEmailDuplication(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.findByEmailWithoutDeleted(email).isPresent()) {
             log.error("중복되는 이메일입니다. {}", email);
             throw new EmailDuplicationException();
         }
