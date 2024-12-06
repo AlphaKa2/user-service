@@ -129,7 +129,7 @@ public interface UserApi {
 
     @Operation(
             summary = "닉네임 중복 판단",
-            description = "닉네임 중복을 판단하는 API 입니다. 중복이 아닐 시 true값을 포함한 응답을 반환합니다.",
+            description = "닉네임 중복을 판단하는 API 입니다. 중복이라면 예외를 던집니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
@@ -152,7 +152,7 @@ public interface UserApi {
 
     @Operation(
             summary = "이메일 중복 판단",
-            description = "이메일 중복을 판단하는 API 입니다. 중복이 아닐 시 true값을 포함한 응답을 반환합니다.",
+            description = "이메일 중복을 판단하는 API 입니다. 중복이라면 예외를 던집니다.",
             tags = {"External API"},
             parameters = {
                     @Parameter(
