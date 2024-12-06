@@ -1,6 +1,7 @@
 package com.alphaka.userservice.service;
 
 import com.alphaka.userservice.dto.request.OAuth2SignInRequest;
+import com.alphaka.userservice.dto.request.PasswordResetRequest;
 import com.alphaka.userservice.dto.request.PasswordUpdateRequest;
 import com.alphaka.userservice.dto.request.ProfileImageUrlUpdateRequest;
 import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
+    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
     private final UserRepository userRepository;
@@ -88,6 +90,10 @@ public class UserService {
 
         // 닉네임 중복 검사
         checkNicknameDuplication(userSignUpRequest.getNickname());
+
+        // sms 인증 토큰 검증
+        jwtService.verifySmsConfirmationToken(userSignUpRequest.getSmsConfirmation(),
+                userSignUpRequest.getPhoneNumber());
 
         userSignUpRequest.setPassword(passwordEncoder.encode(userSignUpRequest.getPassword()));
         User savedUser = userRepository.save(userSignUpRequest.toEntity());
@@ -234,6 +240,19 @@ public class UserService {
         User user = getUserByIdOrThrow(authenticatedUserInfo.getId());
 
         user.delete();
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest passwordFindRequest) {
+        String email = passwordFindRequest.getEmail();
+        User user = getUserByEmailOrThrow(email);
+
+        verifyNonSocialUser(user);
+
+        jwtService.verifySmsConfirmationToken(passwordFindRequest.getSmsConfirmation(),
+                user.getPhoneNumber());
+
+        user.updatePassword(passwordEncoder.encode(passwordFindRequest.getNewPassword()));
     }
 
 
