@@ -2,8 +2,10 @@ package com.alphaka.userservice.controller;
 
 import com.alphaka.userservice.dto.response.ApiResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
+import com.alphaka.userservice.dto.response.UserInfoWithFollowStatusResponse;
 import com.alphaka.userservice.service.FollowService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +56,7 @@ public class FollowController implements FollowApi {
     @ResponseBody
     public ApiResponse<Boolean> followStatus(@RequestParam("userId") Long userId,
                                              AuthenticatedUserInfo authenticatedUserInfo) {
-        log.info("유저 {}의 유저 {} 팔로우 여부 조회 요청", authenticatedUserInfo.getId(),userId);
+        log.info("유저 {}의 유저 {} 팔로우 여부 조회 요청", authenticatedUserInfo.getId(), userId);
         boolean isFollowing = followService.isFollowing(authenticatedUserInfo.getId(), userId);
 
         log.info("팔로잉 여부:{}", isFollowing);
@@ -63,25 +65,29 @@ public class FollowController implements FollowApi {
 
     //사용자의 팔로잉 목록
     @Override
-    @GetMapping("/{userId}/following")
+    @GetMapping("/{targetUserId}/following")
     @ResponseBody
-    public ApiResponse<List<UserInfoResponse>> following(@PathVariable("userId") Long userId) {
-        log.info("유저 {}의 팔로잉 목록 조회 요청", userId);
-        List<UserInfoResponse> followings = followService.followings(userId);
+    public ApiResponse<List<UserInfoWithFollowStatusResponse>> following(
+            @PathVariable("targetUserId") Long targetUserId, HttpServletRequest request) {
+        log.info("유저 {}의 팔로잉 목록 조회 요청", targetUserId);
+        List<UserInfoWithFollowStatusResponse> followings = followService.followingsWithStatus(targetUserId, request);
 
-        log.info("유저 {}의 팔로잉 목록 조회 요청 성공", userId);
+        log.info("유저 {}의 팔로잉 목록 조회 요청 성공", targetUserId);
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), followings);
     }
 
     //사용자의 팔로워 목록
     @Override
-    @GetMapping("/{userId}/follower")
+    @GetMapping("/{targetUserId}/follower")
     @ResponseBody
-    public ApiResponse<List<UserInfoResponse>> follower(@PathVariable("userId") Long userId) {
-        log.info("유저 {}의 팔로워 목록 조회 요청", userId);
-        List<UserInfoResponse> followers = followService.followers(userId);
+    public ApiResponse<List<UserInfoWithFollowStatusResponse>> follower(
+            @PathVariable("targetUserId") Long targetUserId,
+            HttpServletRequest request) {
+        log.info("유저 {}의 팔로워 목록 조회 요청", targetUserId);
+        List<UserInfoWithFollowStatusResponse> followers = followService.followersWithStatus(
+                targetUserId, request);
 
-        log.info("유저 {}의 팔로워 목록 조회 요청 성공", userId);
+        log.info("유저 {}의 팔로워 목록 조회 요청 성공", targetUserId);
         return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), followers);
     }
 
