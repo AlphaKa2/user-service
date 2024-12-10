@@ -1,11 +1,13 @@
 package com.alphaka.userservice.service;
 
-import com.alphaka.userservice.dto.response.UserInfoResponse;
+import com.alphaka.userservice.dto.response.UserInfoWithFollowStatusResponse;
 import com.alphaka.userservice.entity.Follow;
 import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.exception.custom.InvalidFollowRequestException;
 import com.alphaka.userservice.exception.custom.InvalidUnfollowRequestException;
 import com.alphaka.userservice.repository.FollowRepository;
+import com.alphaka.userservice.util.UserInfoHeader;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class FollowService {
 
         User user = userService.getUserByIdOrThrow(userId);
 
-        Optional<Follow> maybeFollow = followRepository.findByFollowerAndFollowed(user, targetUser);
+        Optional<Follow> maybeFollow = followRepository.findByFollowerAndFollowed(user.getId(), targetUser.getId());
 
         // 이미 팔로우를 하고 있는 경우
         if (maybeFollow.isPresent()) {
@@ -66,7 +68,7 @@ public class FollowService {
         User user = userService.getUserByIdOrThrow(userId);
 
         // 두 유저 간의 팔로우 기록이 없는 경우 예외
-        Follow follow = followRepository.findByFollowerAndFollowed(user, targetUser)
+        Follow follow = followRepository.findByFollowerAndFollowed(user.getId(), targetUser.getId())
                 .orElseThrow(InvalidUnfollowRequestException::new);
 
         followRepository.delete(follow);
@@ -75,28 +77,47 @@ public class FollowService {
         targetUser.getFollowers().remove(follow);
     }
 
+    public List<UserInfoWithFollowStatusResponse> followingsWithStatus(Long targetUserId, HttpServletRequest request) {
 
-    //해당 사용자가 팔로우하는 유저들
-    public List<UserInfoResponse> followings(Long userId) {
+        User targetUser = userService.getUserByIdOrThrow(targetUserId);
 
-        User user = userService.getUserByIdOrThrow(userId);
+        String id = request.getHeader(UserInfoHeader.AUTHENTICATED_USER_ID_HEADER.getName());
+        if (id == null) {
+            log.info("로그인하지 않은 사용자의 요청");
+            return followRepository.findFollowingsByUserId(targetUser.getId());
+        }
 
-        return followRepository.findFollowingsByUserId(user.getId());
+        Long requestUserId = Long.valueOf(id);
+        log.info("로그인한 사용자 {}의 요청", requestUserId);
+        User requestUser = userService.getUserByIdOrThrow(requestUserId);
+
+        log.info("팔로우 여부도 함께 조회");
+        return followRepository.findFollowingsWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId, targetUserId);
     }
 
-    //해당 사용자를 팔로우하는 유저들
-    public List<UserInfoResponse> followers(Long userId) {
+    public List<UserInfoWithFollowStatusResponse> followersWithStatus(Long targetUserId, HttpServletRequest request) {
 
-        User user = userService.getUserByIdOrThrow(userId);
+        User targetUser = userService.getUserByIdOrThrow(targetUserId);
 
-        return followRepository.findFollowersByUserId(user.getId());
+        String id = request.getHeader(UserInfoHeader.AUTHENTICATED_USER_ID_HEADER.getName());
+        if (id == null) {
+            log.info("로그인하지 않은 사용자의 요청");
+            return followRepository.findFollowersByUserId(targetUser.getId());
+        }
+
+        Long requestUserId = Long.valueOf(id);
+        log.info("로그인한 사용자 {}의 요청", requestUserId);
+        User requestUser = userService.getUserByIdOrThrow(requestUserId);
+
+        log.info("팔로우 여부도 함께 조회");
+        return followRepository.findFollowersWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId, targetUserId);
     }
 
     public boolean isFollowing(Long userId, Long targetUserId) {
         User user = userService.getUserByIdOrThrow(userId);
         User targetUser = userService.getUserByIdOrThrow(targetUserId);
 
-        return followRepository.findByFollowerAndFollowed(user, targetUser).isPresent();
+        return followRepository.findByFollowerAndFollowed(user.getId(), targetUser.getId()).isPresent();
     }
 
 
