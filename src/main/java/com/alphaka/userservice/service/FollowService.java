@@ -1,5 +1,7 @@
 package com.alphaka.userservice.service;
 
+import com.alphaka.userservice.config.CacheConfig;
+import com.alphaka.userservice.dto.response.UserCacheDto;
 import com.alphaka.userservice.dto.response.UserInfoWithFollowStatusResponse;
 import com.alphaka.userservice.entity.Follow;
 import com.alphaka.userservice.entity.User;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class FollowService {
 
     private final FollowRepository followRepository;
+    private final UserCacheService userCacheService;
     private final UserService userService;
 
     @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = CacheConfig.USER_FOLLOW_COUNT_CACHE, key = "#p0"),
+                    @CacheEvict(value = CacheConfig.USER_FOLLOW_COUNT_CACHE, key = "#p1")
+            }
+    )
     public void follow(Long userId, Long targetUserId) {
 
         User targetUser = userService.getUserByIdOrThrow(targetUserId);
@@ -56,6 +67,12 @@ public class FollowService {
     }
 
     @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = CacheConfig.USER_FOLLOW_COUNT_CACHE, key = "#p0"),
+                    @CacheEvict(value = CacheConfig.USER_FOLLOW_COUNT_CACHE, key = "#p1")
+            }
+    )
     public void unfollow(Long userId, Long targetUserId) {
 
         User targetUser = userService.getUserByIdOrThrow(targetUserId);
@@ -79,7 +96,7 @@ public class FollowService {
 
     public List<UserInfoWithFollowStatusResponse> followingsWithStatus(Long targetUserId, HttpServletRequest request) {
 
-        User targetUser = userService.getUserByIdOrThrow(targetUserId);
+        UserCacheDto targetUser = userCacheService.getUserByIdOrThrowUsingCache(targetUserId);
 
         String id = request.getHeader(UserInfoHeader.AUTHENTICATED_USER_ID_HEADER.getName());
         if (id == null) {
@@ -89,10 +106,11 @@ public class FollowService {
 
         Long requestUserId = Long.valueOf(id);
         log.info("로그인한 사용자 {}의 요청", requestUserId);
-        User requestUser = userService.getUserByIdOrThrow(requestUserId);
+        UserCacheDto requestUser = userCacheService.getUserByIdOrThrowUsingCache(requestUserId);
 
         log.info("팔로우 여부도 함께 조회");
-        return followRepository.findFollowingsWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId, targetUserId);
+        return followRepository.findFollowingsWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId,
+                targetUserId);
     }
 
     public List<UserInfoWithFollowStatusResponse> followersWithStatus(Long targetUserId, HttpServletRequest request) {
@@ -110,12 +128,21 @@ public class FollowService {
         User requestUser = userService.getUserByIdOrThrow(requestUserId);
 
         log.info("팔로우 여부도 함께 조회");
-        return followRepository.findFollowersWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId, targetUserId);
+        return followRepository.findFollowersWithFollowStatusByRequestUserIdAndTargetUserId(requestUserId,
+                targetUserId);
+    }
+
+    public Integer getFollowerCount(Long userId) {
+        return followRepository.countFollowerByUserId(userId);
+    }
+
+    public Integer getFollowingCount(Long userId) {
+        return followRepository.countFollowingByUserId(userId);
     }
 
     public boolean isFollowing(Long userId, Long targetUserId) {
-        User user = userService.getUserByIdOrThrow(userId);
-        User targetUser = userService.getUserByIdOrThrow(targetUserId);
+        UserCacheDto user = userCacheService.getUserByIdOrThrowUsingCache(userId);
+        UserCacheDto targetUser = userCacheService.getUserByIdOrThrowUsingCache(targetUserId);
 
         return followRepository.findByFollowerAndFollowed(user.getId(), targetUser.getId()).isPresent();
     }
