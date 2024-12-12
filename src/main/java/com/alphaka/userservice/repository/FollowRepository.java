@@ -14,6 +14,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Optional<Follow> findByFollowerAndFollowed(@Param("followerId") Long followerId,
                                                @Param("followedId") Long followedId);
 
+    @Query(value = "SELECT COUNT(*) from follow f JOIN users u ON f.followed_id = u.user_id WHERE f.follower_id = :userId AND u.deleted_at IS NULL", nativeQuery = true)
+    Integer countFollowingByUserId(@Param("userId") Long userId);
+
+    @Query(value = "SELECT COUNT(*) from follow f JOIN users u ON f.follower_id = u.user_id WHERE f.followed_id = :userId AND u.deleted_at IS NULL", nativeQuery = true)
+    Integer countFollowerByUserId(@Param("userId") Long userId);
 
     // 해당 사용자가 팔로우하는 유저들
     @Query("select new com.alphaka.userservice.dto.response.UserInfoWithFollowStatusResponse(u.id, u.nickname, u.profileImage, false) "

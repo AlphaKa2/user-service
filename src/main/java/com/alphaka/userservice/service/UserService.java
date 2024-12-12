@@ -8,7 +8,12 @@ import com.alphaka.userservice.dto.request.TripMbtiUpdateRequest;
 import com.alphaka.userservice.dto.request.UserDetailsUpdateRequest;
 import com.alphaka.userservice.dto.request.UserSignInRequest;
 import com.alphaka.userservice.dto.request.UserSignUpRequest;
+import com.alphaka.userservice.dto.response.FollowCountDto;
+import com.alphaka.userservice.dto.response.UserCacheDto;
+import com.alphaka.userservice.dto.response.UserDetailsResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
+import com.alphaka.userservice.dto.response.UserProfileResponse;
+import com.alphaka.userservice.dto.response.UserSignInResponse;
 import com.alphaka.userservice.entity.SocialType;
 import com.alphaka.userservice.entity.TripMBTI;
 import com.alphaka.userservice.entity.User;
@@ -41,6 +46,7 @@ public class UserService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+    private final UserCacheService userCacheService;
     private final UserRepository userRepository;
     private final UserSignupProducerService userSignupProducerService;
 
@@ -48,14 +54,6 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 사용자입니다. {}", userId);
-                    return new UserNotFoundException();
-                });
-    }
-
-    public User getUserByNicknameOrThrow(String nickname) {
-        return userRepository.findByNickname(nickname)
-                .orElseThrow(() -> {
-                    log.error("존재하지 않는 사용자입니다. {}", nickname);
                     return new UserNotFoundException();
                 });
     }
@@ -101,10 +99,13 @@ public class UserService {
         //회원 생성 이벤트 전송
         log.info("회원 {} 생성 이벤트 메시지 전송", savedUser.getId());
         userSignupProducerService.sendMessage(savedUser.getId());
+
+        log.info("회원 캐시 업데이트");
+        userCacheService.updateUserCache(savedUser);
     }
 
     @Transactional
-    public User oauth2SignIn(OAuth2SignInRequest oAuth2SignInRequest) {
+    public UserSignInResponse oauth2SignIn(OAuth2SignInRequest oAuth2SignInRequest) {
         String email = oAuth2SignInRequest.getEmail();
         String nickname = oAuth2SignInRequest.getNickname();
         SocialType socialType = oAuth2SignInRequest.getSocialType();
@@ -119,18 +120,19 @@ public class UserService {
         //유일한 이메일인 경우 소셜 로그인 성공, 만약 DB에 존재하지 않다면 가입
         User user = getOAuth2UserOrCreate(oAuth2SignInRequest);
 
-        user.updateLastLogin();
+        log.info("회원 캐시 업데이트");
+        userCacheService.updateUserCache(user);
 
-        return user;
+        return UserSignInResponse.userSignInResponseFromUser(user);
     }
 
 
-    public User findUserByIdOrNickname(Long id, String nickname) {
-        User user = null;
+    public UserCacheDto findUserByIdOrNickname(Long id, String nickname) {
+        UserCacheDto user = null;
         if (id != null) {
-            user = getUserByIdOrThrow(id);
+            user = userCacheService.getUserByIdOrThrowUsingCache(id);
         } else if (nickname != null) {
-            user = getUserByNicknameOrThrow(nickname);
+            user = userCacheService.getUserByNicknameOrThrowUsingCache(nickname);
         } else {
             log.error("파라미터에 id 혹은 닉네임이 반드시 존재해야합니다.");
             throw new UserNotFoundException();
@@ -139,16 +141,27 @@ public class UserService {
         return user;
     }
 
-    public User signIn(UserSignInRequest userSignInRequest) {
+    public UserSignInResponse signIn(UserSignInRequest userSignInRequest) {
         String email = userSignInRequest.getEmail();
 
-        return getUserByEmailOrThrow(email);
+        User user = getUserByEmailOrThrow(email);
+        userCacheService.updateUserCache(user);
+
+        return UserSignInResponse.userSignInResponseWithPasswordFromUser(user);
     }
 
+    // 토큰 재발급 시 사용
+    public UserSignInResponse signIn(Long userId) {
+        User user = getUserByIdOrThrow(userId);
+        userCacheService.updateUserCache(user);
+
+        return UserSignInResponse.userSignInResponseFromUser(user);
+    }
 
     @Transactional
     public void disableUser(String email) {
         User user = getUserByEmailOrThrow(email);
+        log.info("사용자 {} 계정 잠금", user.getId());
 
         user.disable();
         userRepository.save(user);
@@ -172,6 +185,7 @@ public class UserService {
         user.updateNickname(newNickname);
         user.updateProfileDescription(userDetailsUpdateRequest.getProfileDescription());
 
+        userCacheService.updateUserCache(user);
     }
 
 
@@ -195,6 +209,8 @@ public class UserService {
         verifyCurrentPassword(currentPassword, user);
 
         user.updatePassword(passwordEncoder.encode(newPassword));
+
+        userCacheService.updateUserCache(user);
     }
 
     @Transactional
@@ -208,6 +224,8 @@ public class UserService {
         TripMBTI newMbti = getMbtiOrThrow(tripMbtiUpdateRequest);
 
         user.updateMbti(newMbti);
+
+        userCacheService.updateUserCache(user);
     }
 
 
@@ -217,6 +235,25 @@ public class UserService {
         return users.stream()
                 .map(UserInfoResponse::fromUser)
                 .collect(Collectors.toList());
+    }
+
+    public UserProfileResponse getUserProfileResponse(Long userId) {
+        UserCacheDto user = userCacheService.getUserByIdOrThrowUsingCache(userId);
+        FollowCountDto followCount = userCacheService.getFollowCountByIdUsingCache(userId);
+
+        return UserProfileResponse.fromUser(user, followCount);
+    }
+
+    public UserInfoResponse getUserInfoResponse(Long userId, String nickname) {
+        UserCacheDto user = findUserByIdOrNickname(userId, nickname);
+
+        return UserInfoResponse.fromUser(user);
+    }
+
+    public UserDetailsResponse getUserDetailsResponse(Long userId) {
+        UserCacheDto user = userCacheService.getUserByIdOrThrowUsingCache(userId);
+
+        return UserDetailsResponse.fromUser(user);
     }
 
     @Transactional
@@ -231,8 +268,9 @@ public class UserService {
         s3Service.verifyProfileImageUrl(url);
 
         User user = getUserByIdOrThrow(userId);
-
         user.updateProfileImageUrl(url);
+
+        userCacheService.updateUserCache(user);
     }
 
     @Transactional
@@ -253,6 +291,8 @@ public class UserService {
                 user.getPhoneNumber());
 
         user.updatePassword(passwordEncoder.encode(passwordFindRequest.getNewPassword()));
+
+        userCacheService.updateUserCache(user);
     }
 
 

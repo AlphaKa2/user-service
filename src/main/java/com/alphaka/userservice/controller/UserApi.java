@@ -82,7 +82,7 @@ public interface UserApi {
     @ApiErrorResponseExamples(
             value = {EMAIL_DUPLICATION, NICKNAME_DUPLICATION, INVALID_SMS_CONFIRMATION_TOKEN,
                     DESERIALIZATION_FAILURE, VALIDATION_FAILURE},
-            name = {"이메일 중복", "닉네임 중복", "유효하지 않은 SMS 인증 토큰","역직렬화 실패", "검증 실패"},
+            name = {"이메일 중복", "닉네임 중복", "유효하지 않은 SMS 인증 토큰", "역직렬화 실패", "검증 실패"},
             description = {"증복된 이메일입니다.", "닉네임 중복입니다.", "유효하지 않은 SMS 인증 토큰입니다.",
                     "역직렬화에 실패하였습니다.", "검증에 실패하였습니다."}
     )
@@ -404,7 +404,7 @@ public interface UserApi {
                     )
             )
     )
-    @ApiSuccessResponseExample(responseClass = String.class, data = false, status = HttpStatus.OK)
+    @ApiSuccessResponseExample(responseClass = S3PresignedUrlResponse.class, data = true, status = HttpStatus.OK)
     @ApiErrorResponseExamples(
             value = {GENERATING_PRESIGEND_URL_FAILURE, UNAUTHENTICATED_USER_REQUEST,
                     DESERIALIZATION_FAILURE, VALIDATION_FAILURE},

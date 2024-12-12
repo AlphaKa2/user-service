@@ -58,6 +58,11 @@ spring:
     kubernetes:
       enabled: false
 
+  redis:
+    host: "${REDIS_HOST}"
+    port: "${REDIS_PORT}"
+    password: "${REDIS_PASSWORD}"
+
 
   datasource:
     url: "${DB_URL}"
@@ -99,6 +104,11 @@ spring:
   config:
     activate:
       on-profile: develop
+
+  redis:
+    host: "${REDIS_HOST}"
+    port: "${REDIS_PORT}"
+    password: "${REDIS_PASSWORD}"
 
   datasource:
     url: "${MYSQL_URL}/user_service"

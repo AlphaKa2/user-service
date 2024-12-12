@@ -42,4 +42,16 @@ public class UserDetailsResponse {
                 .birth(user.getBirth())
                 .build();
     }
+
+    public static UserDetailsResponse fromUser(UserCacheDto user) {
+        return UserDetailsResponse.builder()
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .profileDescription(user.getProfileDescription())
+                .gender(user.getGender())
+                .birth(user.getBirth())
+                .build();
+    }
 }
