@@ -22,9 +22,9 @@ public class UserProfileResponse {
     @Schema(example = "gildong12")
     String nickname;
     @Schema(example = "85")
-    int followerCount;
+    Integer followerCount;
     @Schema(example = "110")
-    int followingCount;
+    Integer followingCount;
     @Schema(example = "ABLJ")
     TripMBTI mbti;
     @Schema(example = "체계적 활동파")
@@ -32,13 +32,12 @@ public class UserProfileResponse {
     @Schema(example = "안녕하세요~")
     String profileDescription;
 
-
-    public static UserProfileResponse fromUser(User user) {
+    public static UserProfileResponse fromUser(UserCacheDto user, FollowCountDto followCount) {
         return UserProfileResponse.builder()
                 .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
-                .followerCount(user.getFollowers().size())
-                .followingCount(user.getFollowing().size())
+                .followerCount(followCount.followerCount)
+                .followingCount(followCount.followingCount)
                 .mbti(user.getMbti())
                 .mbtiDescription(user.getMbti().getDescription())
                 .profileDescription(user.getProfileDescription())

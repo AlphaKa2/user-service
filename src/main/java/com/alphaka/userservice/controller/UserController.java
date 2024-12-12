@@ -15,12 +15,11 @@ import com.alphaka.userservice.dto.response.UserDetailsResponse;
 import com.alphaka.userservice.dto.response.UserInfoResponse;
 import com.alphaka.userservice.dto.response.UserProfileResponse;
 import com.alphaka.userservice.dto.response.UserSignInResponse;
-import com.alphaka.userservice.entity.User;
 import com.alphaka.userservice.service.S3Service;
+import com.alphaka.userservice.service.UserCacheService;
 import com.alphaka.userservice.service.UserService;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -53,11 +52,10 @@ public class UserController implements UserApi {
     public ApiResponse<UserSignInResponse> user(@PathVariable("userId") Long userId) {
 
         log.info("인증서비스 accessToken 재발급 위한 유저 {} 정보 조회 요청", userId);
-        User user = userService.getUserByIdOrThrow(userId);
+        UserSignInResponse response = userService.signIn(userId);
 
         log.info("인증서비스 accessToken 재발급 위한 유저 {} 정보 조회 성공", userId);
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserSignInResponse.userSignInResponseFromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response);
     }
 
     // 자체 회원가입
@@ -78,11 +76,10 @@ public class UserController implements UserApi {
     @PostMapping("/oauth2/signin")
     public ApiResponse<UserSignInResponse> oauth2SignIn(@RequestBody @Valid OAuth2SignInRequest oAuth2SignInRequest) {
         log.info("사용자 OAuth2 인증 요청");
-        User user = userService.oauth2SignIn(oAuth2SignInRequest);
+        UserSignInResponse response = userService.oauth2SignIn(oAuth2SignInRequest);
 
         log.info("사용자 OAuth2 인증 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserSignInResponse.userSignInResponseFromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response);
     }
 
 
@@ -91,11 +88,10 @@ public class UserController implements UserApi {
     @PostMapping("/signin")
     public ApiResponse<UserSignInResponse> signIn(@RequestBody @Valid UserSignInRequest userSignInRequest) {
         log.info("사용자 인증 요청");
-        User user = userService.signIn(userSignInRequest);
+        UserSignInResponse response = userService.signIn(userSignInRequest);
 
         log.info("사용자 인증 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserSignInResponse.userSignInResponseWithPasswordFromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response);
     }
 
 
@@ -125,11 +121,10 @@ public class UserController implements UserApi {
     @GetMapping("/{userId}/profile")
     public ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId) {
         log.info("사용자 프로필 조회 요청");
-        User user = userService.getUserByIdOrThrow(userId);
+        UserProfileResponse userProfileResponse = userService.getUserProfileResponse(userId);
 
         log.info("사용자 프로필 조회 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserProfileResponse.fromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), userProfileResponse);
     }
 
     @Override
@@ -139,23 +134,19 @@ public class UserController implements UserApi {
             @RequestParam(value = "nickname", required = false) String nickname) {
 
         log.info("블로그 서비스 사용자 정보 조회 요청");
-
-        User user = userService.findUserByIdOrNickname(userId, nickname);
+        UserInfoResponse response = userService.getUserInfoResponse(userId, nickname);
 
         log.info("블로그 서비스 사용자 정보 조회 요청 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserInfoResponse.fromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response);
     }
 
     @Override
     @GetMapping("/{userId}/details")
     public ApiResponse<UserDetailsResponse> userDetails(@PathVariable("userId") Long userId) {
         log.info("사용자 상세 정보 조회 요청");
-        User user = userService.getUserByIdOrThrow(userId);
-
+        UserDetailsResponse response = userService.getUserDetailsResponse(userId);
         log.info("사용자 상세 정보 조회 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                UserDetailsResponse.fromUser(user));
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), response);
     }
 
     @Override
@@ -204,8 +195,7 @@ public class UserController implements UserApi {
         List<UserInfoResponse> userList = userService.findUsersByIds(userIds);
 
         log.info("블로그 서비스 사용자들 리스트 정보 조회 성공");
-        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(),
-                userList);
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), userList);
     }
 
     @Override

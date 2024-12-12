@@ -23,4 +23,9 @@ public class UserInfoResponse {
     public static UserInfoResponse fromUser(User user) {
         return new UserInfoResponse(user.getId(), user.getNickname(), user.getProfileImage());
     }
+
+    public static UserInfoResponse fromUser(UserCacheDto user) {
+        return new UserInfoResponse(user.getId(), user.getNickname(), user.getProfileImage());
+    }
+
 }
