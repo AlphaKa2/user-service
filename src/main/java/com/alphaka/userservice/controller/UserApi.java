@@ -199,6 +199,30 @@ public interface UserApi {
     )
     ApiResponse<UserProfileResponse> userProfile(@PathVariable("userId") Long userId);
 
+
+    @Operation(
+            summary = "사용자 닉네임으로 프로필 조회",
+            description = "사용자의 닉네임을 통해 사용자 프로필을 조회하는 API입니다.",
+            tags = {"External API"},
+            parameters = {
+                    @Parameter(
+                            name = "nickname",
+                            description = "사용자의 고유한 닉네임",
+                            required = true,
+                            example = "userA",
+                            in = ParameterIn.PATH,
+                            schema = @Schema(type = "string")
+                    )
+            }
+    )
+    @ApiSuccessResponseExample(responseClass = UserProfileResponse.class, data = true, status = HttpStatus.OK)
+    @ApiErrorResponseExamples(
+            value = {USER_NOT_FOUND},
+            name = {"사용자 없음"},
+            description = {"존재하지 않는 사용자입니다."}
+    )
+    ApiResponse<UserProfileResponse> userProfileByNickname(@PathVariable("nickname") String nickname);
+
     @Operation(
             summary = "블로그 서비스의 사용자 정보 조회",
             description = "블로그 서비스에서 사용자의 id 혹은 닉네임으로 사용자 정보를 조회하는 API입니다.",

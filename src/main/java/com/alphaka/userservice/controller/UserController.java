@@ -128,6 +128,16 @@ public class UserController implements UserApi {
     }
 
     @Override
+    @GetMapping("nickname/{nickname}/profile")
+    public ApiResponse<UserProfileResponse> userProfileByNickname(@PathVariable("nickname") String nickname) {
+        log.info("닉네임으로 사용자 프로필 조회 요청 {}", nickname);
+        UserProfileResponse userProfileResponse = userService.getUserProfileResponseByNickname(nickname);
+
+        log.info("사용자 프로필 조회 성공");
+        return ApiResponse.createSuccessResponseWithData(HttpStatus.OK.value(), userProfileResponse);
+    }
+
+    @Override
     @GetMapping("/info")
     public ApiResponse<UserInfoResponse> userInfoByIdOrNickname(
             @RequestParam(value = "userId", required = false) Long userId,
