@@ -244,6 +244,13 @@ public class UserService {
         return UserProfileResponse.fromUser(user, followCount);
     }
 
+    public UserProfileResponse getUserProfileResponseByNickname(String nickname) {
+        UserCacheDto user = userCacheService.getUserByNicknameOrThrowUsingCache(nickname);
+        FollowCountDto followCount = userCacheService.getFollowCountByIdUsingCache(user.getId());
+
+        return UserProfileResponse.fromUser(user, followCount);
+    }
+
     public UserInfoResponse getUserInfoResponse(Long userId, String nickname) {
         UserCacheDto user = findUserByIdOrNickname(userId, nickname);
 
