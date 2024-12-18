@@ -1,6 +1,5 @@
 package com.alphaka.userservice.dto.response;
 
-import com.alphaka.userservice.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoResponse {
+public class UserInfoWithFollowStatusResponse {
 
     @Schema(example = "1")
     private Long userId;
@@ -19,13 +18,7 @@ public class UserInfoResponse {
     private String nickname;
     @Schema(example = "/img/default")
     private String profileImage;
-
-    public static UserInfoResponse fromUser(User user) {
-        return new UserInfoResponse(user.getId(), user.getNickname(), user.getProfileImage());
-    }
-
-    public static UserInfoResponse fromUser(UserCacheDto user) {
-        return new UserInfoResponse(user.getId(), user.getNickname(), user.getProfileImage());
-    }
+    @Schema(example = "true")
+    private Boolean followStatus = false;
 
 }

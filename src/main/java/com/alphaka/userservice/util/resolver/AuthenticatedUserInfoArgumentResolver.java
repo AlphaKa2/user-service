@@ -6,6 +6,7 @@ import com.alphaka.userservice.entity.Role;
 import com.alphaka.userservice.exception.custom.UnatuhenticatedUserRequestException;
 import com.alphaka.userservice.util.AuthenticatedUserInfo;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+@Slf4j
 @Component
 public class AuthenticatedUserInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -25,10 +27,12 @@ public class AuthenticatedUserInfoArgumentResolver implements HandlerMethodArgum
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
+        log.info("인증된 유저 정보 추출");
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
         String id = request.getHeader(AUTHENTICATED_USER_ID_HEADER.getName());
         if (id == null) {
+            log.error("인증된 사용자의 요청이 아닙니다.");
             throw new UnatuhenticatedUserRequestException();
         }
         Long userId = Long.valueOf(id);

@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TripMbtiUpdateRequest {
+public class ProfileImageUrlUpdateRequest {
 
-    @NotBlank
-    @Schema(description = "여행 MBTI", example = "ABLJ", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String mbti;
+    @NotBlank(message = "프로필 이미지 경로는 필수 입력값입니다.")
+    @Schema(description = "s3 presigned url", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String profileImageUrl;
+
 }

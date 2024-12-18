@@ -3,18 +3,19 @@ package com.alphaka.userservice.exception.handler;
 import com.alphaka.userservice.dto.response.ErrorResponse;
 import com.alphaka.userservice.exception.ErrorCode;
 import com.alphaka.userservice.exception.custom.CustomException;
+import com.amazonaws.SdkClientException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class S3ClientExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException exception) {
+    @ExceptionHandler(SdkClientException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(SdkClientException exception) {
 
-        ErrorCode errorCode = exception.getErrorCode();
+        ErrorCode errorCode = ErrorCode.GENERATING_PRESIGEND_URL_FAILURE;
         ErrorResponse errorResponse = new ErrorResponse(
                 errorCode.getStatus(),
                 errorCode.getCode(),

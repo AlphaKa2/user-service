@@ -1,5 +1,6 @@
 package com.alphaka.userservice.entity;
 
+import com.alphaka.userservice.config.UserConfig;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -27,6 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "Users")
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseEntity {
 
     @Id
@@ -52,8 +56,7 @@ public class User extends BaseEntity {
     private LocalDate birth;
 
     @Column(nullable = false)
-    @Builder.Default
-    private String profileImage = "/img/default";
+    private String profileImage;
 
     // 유저의 팔로잉 리스트(1:N 관계)
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -111,7 +114,24 @@ public class User extends BaseEntity {
         this.mbti = mbti;
     }
 
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
+    }
+
+    // 계정 잠김
     public void disable() {
         this.isActive = false;
+    }
+
+    // 계정 소프트 딜리트
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    public void setDefaultProfileImage() {
+        if (this.profileImage == null) {
+            this.profileImage = UserConfig.defaultProfileImage;
+        }
     }
 }
