@@ -47,6 +47,7 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
+
             steps {
                 withCredentials([usernamePassword(credentialsId: "${env.DOCKERHUB_CREDENTIAL}", usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                     sh '''
