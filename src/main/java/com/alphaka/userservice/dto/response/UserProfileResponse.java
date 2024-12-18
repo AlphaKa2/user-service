@@ -17,6 +17,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserProfileResponse {
 
+    @Schema(example = "1")
+    Long userId;
     @Schema(example = "/img/default")
     String profileImage;
     @Schema(example = "gildong12")
@@ -34,6 +36,7 @@ public class UserProfileResponse {
 
     public static UserProfileResponse fromUser(UserCacheDto user, FollowCountDto followCount) {
         return UserProfileResponse.builder()
+                .userId(user.getId())
                 .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
                 .followerCount(followCount.followerCount)
